@@ -47,7 +47,7 @@ const ActivityLogs = require('../models/ActivityLogs');
  getActivityById = async (req, res) => {
     try {
         const id = req.parmas.id
-        const logges = await ActivityLogs.findById(id).populate(path:'user',select:'name')
+        const logges = await ActivityLogs.findById(id).populate({path:'user',select:'name'})
         return res.status(201).json({ message: "fetched MyActivit logs successfully",Data:logges })
     } catch (error) {
         throw new Error(error.message);
