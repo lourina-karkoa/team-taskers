@@ -1,5 +1,9 @@
 const { default: mongoose } = require("mongoose");
+
+const paginate = require("../plugins/paginate");
+
 const createAdmin = require("../helpers/createAdmin");
+
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -15,7 +19,7 @@ const userSchema = new mongoose.Schema({
         type: String,
     },
     role: { type: String, enum: ['TeamMember', 'Manager'], default: 'TeamMember' },
-    // addresses: [addressSchema],
+
 }, {
     timestamps: true
 });
@@ -31,6 +35,8 @@ userSchema.pre('save', function(next) {
     }
     next(); 
 });
+
+userSchema.plugin(paginate)
 
 const Users = mongoose.model("Users", userSchema)
 
