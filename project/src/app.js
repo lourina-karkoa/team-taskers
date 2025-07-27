@@ -1,10 +1,11 @@
 const express = require("express");
 const app = express();
+const routerAuth = require("./routes/auth.routes")
 
 // import
 const logger = require("morgan");
 const cors = require("cors");
-// const errorHandler = require("./middlewares/errorhandler.middleware");
+const errorHandler = require("./middlewares/errorhandler.middleware");
 const path = require("path")
 
 // middlewares
@@ -21,6 +22,10 @@ app.use(express.urlencoded({ extended: true }));
 // app.use();
 // app.use();
 
-// app.use(errorHandler);
+// auth
+app.use('/api/auth' , routerAuth)
+
+
+app.use(errorHandler);
 
 module.exports = app;
