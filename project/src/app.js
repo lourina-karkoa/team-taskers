@@ -1,9 +1,11 @@
 const express = require("express");
 const app = express();
+const routerAuth = require("./routes/auth.routes")
 
 // import
 const logger = require("morgan");
 const cors = require("cors");
+
 
 const errorHandler = require("./middlewares/errorhandler.middleware");
 
@@ -29,11 +31,18 @@ app.use("/api/users", require("./routes/users.routes"));
 // app.use();
 
 
+
 app.use("/api/tasks",tasksPath);
 
 
 //app.use(notFound)
 app.use(errorHandler);
+
+
+
+// auth
+app.use('/api/auth' , routerAuth)
+
 
 
 
