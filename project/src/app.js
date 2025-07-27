@@ -4,8 +4,10 @@ const app = express();
 // import
 const logger = require("morgan");
 const cors = require("cors");
-// const errorHandler = require("./middlewares/errorhandler.middleware");
+//const notFound = require("./middlewares/notFound.middleware");
+//const errorHandler = require("./middlewares/errorhandler.middleware");
 const path = require("path")
+const tasksPath = require("./routes/tasks.routes")
 
 // middlewares
 app.use(logger("dev"));
@@ -18,9 +20,11 @@ app.use(express.static(path.join(__dirname, '../public/uploads')));
 app.use(express.urlencoded({ extended: true }));
 
 // routers
-// app.use();
+app.use("/api/tasks",tasksPath);
 // app.use();
 
-// app.use(errorHandler);
+//app.use(notFound)
+//app.use(errorHandler);
+
 
 module.exports = app;
