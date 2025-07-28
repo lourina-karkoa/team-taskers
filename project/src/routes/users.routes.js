@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const upload = require("../config/multer");
 
+
 const auth = require("../middlewares/auth.middleware");
 const role = require("../middlewares/role");
 
@@ -29,5 +30,6 @@ router.put("/update-password", [...updatePasswordValidate], usersController.upda
 router.delete("/id", [auth, role(["Manager"])], [...deleteUserValidate], usersController.deleteUser);
 
 router.delete("/", [auth, role(["Manager"])], usersController.deleteAllUser);
+
 
 module.exports = router
