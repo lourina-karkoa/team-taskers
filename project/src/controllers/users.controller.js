@@ -2,9 +2,9 @@
 const users = require("../models/Users")
 const Task = require("../models/Task")
 const Notes = require("../models/Notes")
-const Projects = require("../models/Projects")
+const Projects = require("../models/Project")
 const ActivityLogs = require("../models/ActivityLogs")
-const { hash, verify } = require("../helpers/argon2.helper");
+const { hash } = require("../helpers/argon2.helper");
 const OTP = require("../models/OTP");
 const sendEmail = require("../config/email");
 const generateOTP = require("../helpers/generateOTP")

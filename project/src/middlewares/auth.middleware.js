@@ -1,7 +1,6 @@
-
 const User = require('../models/Users');
 const jwt = require('jsonwebtoken');
-const ActivityLog = require('../models/ActivityLog');
+const ActivityLog = require('../models/ActivityLogs');
 
 // Verify JWT token
 const authenticateToken = async (req, res, next) => {
@@ -75,8 +74,6 @@ module.exports = {
     logActivity
 };
 
-const jwt = require("jsonwebtoken");
-const Users = require("../models/Users");
 
 const auth = async (req, res, next) => {
     const { authorization } = req.headers;

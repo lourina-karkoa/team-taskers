@@ -4,7 +4,7 @@ const upload = require("../config/multer");
 
 
 const auth = require("../middlewares/auth.middleware");
-const role = require("../middlewares/role");
+const role = require("../middlewares/role.middleware");
 
 // controller
 const usersController = require("../controllers/users.controller");
