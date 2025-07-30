@@ -11,7 +11,7 @@ const activityLogSchema = new mongoose.Schema({
         required:[true,"ActivityType is required"],
         enum:[
             'CREATE_PROJECT',
-            'CREATE_TASK','UPDATE_TASK',
+            'CREATE_TASK','UPDATE_TASK', 'project_updated','project_deleted',
             'ADD_NOTE',
             'USER_LOGIN'
         ]

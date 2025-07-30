@@ -1,11 +1,12 @@
 module.exports = function paginate(schema) {
-    schema.statics.paginate = async function({ filter = {}, populate,select = [], page = 1, limit = 20, sort = '-createdAt' }) {
+
+    schema.statics.paginate = async function({ filter = {}, populate, page = 1, limit = 5, sort = '-createdAt' }) {
         const skip = (page - 1) * limit;
         const data = 
             populate 
-            ? await this.find(filter).skip(skip).limit(limit).sort(sort).select([...select,'?-password']).populate(populate, "-password -__v")
-            : await this.find(filter).skip(skip).limit(limit).sort(sort).select([...select,'?-password']);
-  
+            ? await this.find(filter).skip(skip).limit(limit).sort(sort).select("-__v -password").populate(populate, "-password -__v")
+            : await this.find(filter).skip(skip).limit(limit).sort(sort).select("-__v -password");
+
             
         const total = await this.countDocuments(filter);
         const pages = Math.ceil(total / limit);
