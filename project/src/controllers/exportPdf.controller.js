@@ -1,4 +1,3 @@
-
 const generatePdf = require('../helpers/pdfGenerator');
 const Projects = require('../models/Projects');
 const Task = require('../models/Task');
