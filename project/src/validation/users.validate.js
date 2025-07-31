@@ -1,7 +1,7 @@
 const { body, param, query } = require('express-validator');
 const Users = require("../models/Users");
 const validate = require("../middlewares/validate.middleware");
-
+const mongoose = require("mongoose");
 const updateProfileValidate = [
   body("name")
     .isString().withMessage("Name must be string"),
@@ -12,7 +12,7 @@ const updateProfileValidate = [
     .custom(async (value, { req }) => {
       const existingUser = await Users.findOne({ email: value });
 
-      if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
+      if (existingUser && existingUser._id !== req.user._id) {
         throw new Error("Email is already used by another user");
       }
 
