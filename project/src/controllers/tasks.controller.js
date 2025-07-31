@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 const Task = require("../models/Task");
-const logActivity = require("../helpers/logActivity");
-const asyncHandler = require("express-async-handler");
 
+const asyncHandler = require("express-async-handler");
+const logActivity = require('../helpers/logActivity.helper');
 
 const getAllTaskes = asyncHandler (async(req, res) => {
             // const {status , dueDate ,projectId ,assignedTo } = req.query;
@@ -36,6 +36,10 @@ const createTask = asyncHandler (async(req, res) => {
             projectId : req.body.projectId ,
             assignedTo : req.body.assignedTo
       });
+
+      // Log activity
+      await logActivity('CREATE_TASK',req.user._id,'Task',task._id);
+
       const result =  await task.save();
       res.status(201).json(result);
             
@@ -62,15 +66,9 @@ const updateTask = asyncHandler (async(req, res) => {
            if (!updatedTask) {
            return res.status(404).json({ message: "Task not found." });
            }
-           /*
-           await logActivity({
-                   user : req.user.id ,
-                   ActivityType: "UPDATE_TASK",
-                   entityType: "Task",
-                   entityId: task._id,
-                   description: `Task updated`,
-           });
-            */
+
+           // Log activity
+           await logActivity('UPDATE_TASK',req.user._id,'Task',updatedTask._id);
 
            return res.status(200).json(updatedTask);
 

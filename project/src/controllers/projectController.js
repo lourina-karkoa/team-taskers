@@ -2,7 +2,7 @@ const Project = require('../models/Project');
 const Task = require('../models/Task');
 const User = require('../models/Users');
 const ActivityLogs = require('../models/ActivityLogs');
-
+const logActivity = require('../helpers/logActivity.helper');
 // Create new project (Manager only)
 const createProject = async (req, res) => {
     try {
@@ -35,10 +35,7 @@ const createProject = async (req, res) => {
     await project.populate('manager teamMembers', 'name email role');
 
     // Log activity
-    await ActivityLogs.create({
-        ActivityType: 'CREATE_PROJECT',
-        user: req.User._id,
-    });
+    await logActivity('CREATE_PROJECT',req.user._id,'Project',project._id);
 
     res.status(201).json({
         success: true,
@@ -186,11 +183,10 @@ const updateProject = async (req, res) => {
             { new: true, runValidators: true }
         ).populate('manager teamMembers', 'name email role');
 
+
     // Log activity
-        await ActivityLogs.create({
-            ActivityType: 'project_updated',
-            user: req.User._id
-        });
+     await logActivity('PROJECT_UPDATE',req.user._id,'Project',project._id);
+
 
         res.json({
             success: true,
@@ -238,10 +234,7 @@ const updateProject = async (req, res) => {
     await project.save();
 
     // Log activity
-    await ActivityLogs.create({
-        ActivityType: 'project_deleted',
-        user: req.User._id,
-    });
+    await logActivity('PROJECT_DELETED',req.user._id,'Project',project._id);
 
     res.json({
         success: true,

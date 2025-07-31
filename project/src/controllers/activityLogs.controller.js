@@ -1,20 +1,25 @@
 const ActivityLogs = require('../models/ActivityLogs');
 
 class ActivitiesLog {
-    // API does fetch for full activity log
+    // API does fetch for full activity log and search by ActivityTpye (Manager only)
     getAllActivityLogs = async (req, res) => {
         try {
             const page = parseInt(req.query.page);
-            const logges = await ActivityLogs.paginate({ select: ['user', 'ActivityType', 'description', 'entityRef.entityId'], page: page })
+            const Activity = req.query.Activity;
 
-            return res.status(201).json({ message: "Done", Data: logges })
+            const logges = 
+               Activity
+               ? await ActivityLogs.paginate({filter: {ActivityType:'Activity'},populate:'user' ,select: ['user', 'ActivityType', 'description', 'entityRef.entityId'], page: page })
+               : await ActivityLogs.paginate({populate:'user' ,select: ['user', 'ActivityType', 'description', 'entityRef.entityId'], page: page });
+
+            return res.status(201).json({ message: "Activity logs have been successfully brought in", Data: logges })
         } catch (error) {
             throw new Error(error.message);
         }
 
     };
 
-    // API deletes full activity history
+    // API deletes full activity history(manager only)
     deleteAllActivityLogs = async (req, res) => {
         try {
 
@@ -26,13 +31,28 @@ class ActivitiesLog {
         }
 
     };
-    // API fetch the activities he has added
-    getMyActivity = async (req, res) => {
+        // API delete activity by id(manager only)
+    deleteActivityLog = async (req, res) => {
+        try {
+            const logId = req.parmas.logId;
+            const logges = await ActivityLogs.findByIdAndDelete(logId);
+            if(!logges){
+             return res.status(404).json({ message: "activity not found!" })
+            }
+
+            return res.status(201).json({ message: "Deleted successfully" })
+        } catch (error) {
+            throw new Error(error.message);
+        }
+
+    };
+    // API view the activities of a spercific user
+    getUserActivity = async (req, res) => {
         try {
             const id = req.query.id;
             const page = parseInt(req.query.page);
-            const logges = await ActivityLogs.paginate({ filter: { user: id }, select: ['user', 'ActivityType', 'description', 'entityRef.entityId'], page: page })
-            return res.status(201).json({ message: "fetched MyActivit logs successfully", Data: logges })
+            const logges = await ActivityLogs.paginate({ filter: { user: id }, select: ['ActivityType', 'description', 'entityRef.entityId'], page: page })
+            return res.status(201).json({ message: "fetched user activities successfully", Data: logges })
         } catch (error) {
             throw new Error(error.message);
         }

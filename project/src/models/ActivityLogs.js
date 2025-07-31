@@ -10,10 +10,10 @@ const activityLogSchema = new mongoose.Schema({
         type:String,
         required:[true,"ActivityType is required"],
         enum:[
-            'CREATE_PROJECT',
-            'CREATE_TASK','UPDATE_TASK', 'project_updated','project_deleted',
+            'CREATE_PROJECT','PROJECT_UPDATE','PROJECT_DELETED',
+            'CREATE_TASK','UPDATE_TASK',
             'ADD_NOTE',
-            'USER_LOGIN'
+            'USER_LOGIN','USER_LOGOUT'
         ]
     },
     user:{
@@ -24,7 +24,7 @@ const activityLogSchema = new mongoose.Schema({
     entityRef:{
             entityType:{
                 type:String,
-                enum:['Projects','Task','Notes','Users',null],
+                enum:['Project','Task','Notes','Users',null],
                 default:null
         },
             entityId:{

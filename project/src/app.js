@@ -14,7 +14,8 @@ const errorHandler = require("./middlewares/errorhandler.middleware");
 
 
 const path = require("path")
-const tasksPath = require("./routes/tasks.routes")
+const tasksPath = require("./routes/tasks.routes");
+const ActivitiesLogRouters = require('./routes/ActivityLogs.routes');
 
 
 // middlewares
@@ -37,6 +38,8 @@ app.use("/api/users", require("./routes/users.routes"));
 
 
 app.use("/api/tasks",tasksPath);
+app.use("/api/activity-logs",require('./routes/ActivityLogs.routes'));
+
 
 
 //app.use(notFound)
