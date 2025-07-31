@@ -22,7 +22,7 @@ router.post("/send-otp", [...otpValidate], usersController.sendOTP)
 router.post("/check-otp",[...checkOTPValidate], usersController.checkOTP)
 
 // PUT 
-router.put("/update", [auth, upload.single("image"), ...updateProfileValidate], usersController.updateProfile);
+router.put("/update", [auth, upload.single("image") ,...updateProfileValidate], usersController.updateProfile);
 
 router.put("/update-password", [...updatePasswordValidate], usersController.updatePassword);
 

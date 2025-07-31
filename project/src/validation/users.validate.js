@@ -12,11 +12,10 @@ const updateProfileValidate = [
     .custom(async (value, { req }) => {
       const existingUser = await Users.findOne({ email: value });
 
-      if (existingUser && existingUser._id !== req.user._id) {
-        throw new Error("Email is already used by another user");
-      }
+      // ✅ طريقة أخرى صحيحة:
+      if (existingUser && !existingUser._id.equals(req.user._id))
 
-      return true;
+        return true;
     }),
 
 
