@@ -90,7 +90,7 @@ const auth = async (req, res, next) => {
 
         const { id, email, role } = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-        const isExist = await Users.findById(id);
+        const isExist = await User.findById(id);
 
         if(!isExist) {
             return res.status(401).json({ message: "Invalid Authorization" })
