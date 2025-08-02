@@ -31,7 +31,7 @@ projectId: {
   },
 assignedTo: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Users",
     required: [true, "Assigned user is required"],
   },
 }, { 

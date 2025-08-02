@@ -57,7 +57,7 @@ class UsersControllor {
 
             const data = await Users.findOne({ email }).select("-password")
              // Log activity
-            await logActivity('USER_LOGIN',user._id,null,null);
+            await logActivity('USER_LOGIN',user.id,'Users',user.id);
             return res.status(201).json({ message: "Done", data, token })
         } catch (error) {
             throw new Error(error.message);
@@ -69,7 +69,7 @@ class UsersControllor {
     async logout(req, res) {
         try {
             // Log activity
-            await logActivity('USER_LOGOUT',req.user._id,Users,req.user._id)
+            await logActivity('USER_LOGOUT',req.user.id,'Users',req.user.id)
             return res.status(200).json({ message: "Done" });
         } catch (error) {
             throw new Error(error.message);

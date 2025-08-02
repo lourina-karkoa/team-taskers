@@ -38,7 +38,7 @@ const createTask = asyncHandler (async(req, res) => {
       });
 
       // Log activity
-      await logActivity('CREATE_TASK',req.user._id,'Task',task._id);
+      await logActivity('CREATE_TASK',req.user.id,'Task',task.id);
 
       const result =  await task.save();
       res.status(201).json(result);
@@ -68,7 +68,7 @@ const updateTask = asyncHandler (async(req, res) => {
            }
 
            // Log activity
-           await logActivity('UPDATE_TASK',req.user._id,'Task',updatedTask._id);
+           await logActivity('UPDATE_TASK',req.user.id,'Task',updatedTask.id);
 
            return res.status(200).json(updatedTask);
 

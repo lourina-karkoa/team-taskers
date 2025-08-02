@@ -33,7 +33,7 @@ const projectSchema = new mongoose.Schema({
     },
     manager: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
+        ref: 'Users',
         required: [true, 'Project manager is required']
     },
     teamMembers: [{

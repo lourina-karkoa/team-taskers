@@ -1,5 +1,4 @@
 const { body } = require('express-validator');
-
 const handleValidationErrors = require("../middlewares/errorhandler.middleware")
 
 // Project validation rules
@@ -37,7 +36,7 @@ const validateProject = [
     .optional()
     .isArray()
     .withMessage('Team members must be an array'),
-    
+   
     handleValidationErrors
 ];
 

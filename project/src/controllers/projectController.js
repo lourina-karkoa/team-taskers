@@ -35,7 +35,7 @@ const createProject = async (req, res) => {
     await project.populate('manager teamMembers', 'name email role');
 
     // Log activity
-    await logActivity('CREATE_PROJECT',req.user._id,'Project',project._id);
+    await logActivity('CREATE_PROJECT',req.user.id,'Project',project.id);
 
     res.status(201).json({
         success: true,
@@ -185,7 +185,7 @@ const updateProject = async (req, res) => {
 
 
     // Log activity
-     await logActivity('PROJECT_UPDATE',req.user._id,'Project',project._id);
+     await logActivity('PROJECT_UPDATE',req.user.id,'Project',project.id);
 
 
         res.json({
@@ -234,7 +234,7 @@ const updateProject = async (req, res) => {
     await project.save();
 
     // Log activity
-    await logActivity('PROJECT_DELETED',req.user._id,'Project',project._id);
+    await logActivity('PROJECT_DELETED',req.user.id,'Project',project.id);
 
     res.json({
         success: true,

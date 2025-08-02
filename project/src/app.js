@@ -16,6 +16,7 @@ const errorHandler = require("./middlewares/errorhandler.middleware");
 const path = require("path")
 const tasksPath = require("./routes/tasks.routes");
 const ActivitiesLogRouters = require('./routes/ActivityLogs.routes');
+const ExportPdfRouters = require('./routes/exportPDF.routes');
 
 
 // middlewares
@@ -34,12 +35,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/users", require("./routes/users.routes"));
 
 // app.use();
-
-
-
 app.use("/api/tasks",tasksPath);
-app.use("/api/activity-logs",require('./routes/ActivityLogs.routes'));
-
+// Activity-logs APIs
+app.use("/api/activity-logs",ActivitiesLogRouters);
+//Export-PDF APIS
+app.use("/api/export",ExportPdfRouters);
 
 
 //app.use(notFound)

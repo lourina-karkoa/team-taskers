@@ -17,7 +17,7 @@ router.use(authenticateToken);
 router.get('/', getProjects);
 
 // Get single project (accessible to all authenticated users)
-router.get('/:id', validateObjectId, getProject);
+router.get('/:id',validateObjectId, getProject);
 
 // Manager-only routes
 router.post('/', requireManager, validateProject, logActivity('CREATE_PROJECT', 'Project'), createProject);
