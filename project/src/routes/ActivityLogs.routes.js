@@ -13,4 +13,6 @@ ActivityRouter.get('/My',[auth,role(["Manager","TeamMember"])],ActivitiesLog.get
 ActivityRouter.get('/:id',[auth,role(["Manager","TeamMember"]),validateObjectId("id")],ActivitiesLog.getActivityById);
 ActivityRouter.delete('/deleteActivity/:logId',[auth,role(["Manager"]),validateObjectId("logId")],ActivitiesLog.deleteActivityLog);
 ActivityRouter.delete('/deleteAllActivity',[auth,role(["Manager"])],ActivitiesLog.deleteAllActivityLogs);
+
+
 module.exports = ActivityRouter

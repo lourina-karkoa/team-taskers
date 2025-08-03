@@ -18,6 +18,7 @@ const path = require("path")
 const tasksPath = require("./routes/tasks.routes");
 const ActivitiesLogRouters = require('./routes/ActivityLogs.routes');
 const ExportPdfRouters = require('./routes/exportPDF.routes');
+const NotesRouters = require('./routes/notes.routes');
 
 
 // middlewares
@@ -43,6 +44,8 @@ app.use("/api/tasks",tasksPath);
 app.use("/api/activity-logs",ActivitiesLogRouters);
 //Export-PDF APIS
 app.use("/api/export",ExportPdfRouters);
+//Notes APIS
+app.use('/api/notes',NotesRouters)
 
 
 //app.use(notFound)
