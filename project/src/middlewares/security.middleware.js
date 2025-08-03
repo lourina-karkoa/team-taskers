@@ -30,9 +30,15 @@ function deepSanitize(obj) {
 }
 
 function rejectIfMalicious(obj){
-    
-    const str = JSON.stringify(obj).toLowerCase();    
-    if(str.includes('script') || str.includes('$ne') || str.includes('$where')){
+    if(!obj || typeof obj !== 'object'){
+        return false;
+    }
+    const str = JSON.stringify(obj); 
+    if(typeof str !== 'string'){
+        return false; 
+    }
+    const lower = str.toLowerCase()
+    if(lower.includes('script') || lower.includes('$ne') || lower.includes('$where')){
         return true
     }
     return false
@@ -40,13 +46,15 @@ function rejectIfMalicious(obj){
 
 function cleanInput(req, res, next) {
   console.log("cleanInput-successfully");
-    if(rejectIfMalicious(req.body)|| rejectIfMalicious(req.query)){
+
+    if(rejectIfMalicious(req.body)){
         return res.status(400).json({message:"suspicious input"})
     }
 
   req.body = deepSanitize(req.body);
   req.query = deepSanitize(req.query);
   req.params = deepSanitize(req.params);
+  
   next();
 }
 
