@@ -1,5 +1,9 @@
 const { default: mongoose } = require("mongoose");
+
 const paginate = require("../plugins/paginate");
+
+const createAdmin = require("../helpers/createAdmin");
+
 
 const userSchema = new mongoose.Schema({
     name: {
@@ -15,7 +19,7 @@ const userSchema = new mongoose.Schema({
         type: String,
     },
     role: { type: String, enum: ['TeamMember', 'Manager'], default: 'TeamMember' },
-   
+
 }, {
     timestamps: true
 });
@@ -35,6 +39,20 @@ userSchema.pre('save', function(next) {
 userSchema.plugin(paginate)
 
 const Users = mongoose.model("Users", userSchema)
+
+
+const email = process.env.ADMIN_EMAIL;
+const password = process.env.ADMIN_PASSWORD;
+
+createAdmin(Users, email, password)
+    .then(e => {
+        console.log("Admin is created")
+    })
+    .catch(err => {
+        console.log(err.message)
+    })
+
+
 
 
 module.exports = Users;
