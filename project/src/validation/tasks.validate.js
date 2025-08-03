@@ -1,6 +1,6 @@
 const { body } = require("express-validator");
 const Task = require("../models/Task");
-const Project = require("../models/Projects");
+const Project = require("../models/Project");
 const User = require ("../models/Users");
 const validate = require("../middlewares/validate.middleware");
 
@@ -57,8 +57,8 @@ const createTaskValidate = [
 ];
 
 const updateTaskValidate = [
-  body("title").optional().isString().withMessage("title must be string"),,
-  body("description").optional().isString().withMessage("description must be string"),,
+  body("title").optional().isString().withMessage("title must be string"),
+  body("description").optional().isString().withMessage("description must be string"),
   body("dueDate").optional().isISO8601().withMessage("Invalid date"),
   body("priority").optional().isIn(["low", "medium", "high"]).withMessage("Invalid priority"),
   body("status").optional().isIn(["in_progress", "completed", "delayed"]).withMessage("Invalid status"),
@@ -88,10 +88,9 @@ const updateTaskValidate = [
 
         return true;
      }),
-
-
   validate
 ];
+
 
 
 module.exports = {
