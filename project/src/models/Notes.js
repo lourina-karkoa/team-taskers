@@ -1,13 +1,14 @@
-const { default: mongoose } = require("mongoose");
+const mongoose = require("mongoose");
 
 const Notes = mongoose.model("Notes", new mongoose.Schema({
     user: { 
-        type: ObjectId, 
+        type: mongoose.Schema.Types.ObjectId, 
         ref: 'User', 
         required: true 
     },
     task: { 
-        type: ObjectId, ref: 'Task', 
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Task', 
         required: true 
     },
     content: {

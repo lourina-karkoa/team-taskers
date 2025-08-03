@@ -1,5 +1,5 @@
 const mongoose= require("mongoose")
-
+const  paginate = require('../plugins/paginate')
 
 const taskSchema = new mongoose.Schema({
 title: {
@@ -37,5 +37,6 @@ assignedTo: {
 }, { 
     timestamps: true 
 });
+taskSchema.plugin(paginate);
 const Task = mongoose.model("Task", taskSchema)
 module.exports = Task;
