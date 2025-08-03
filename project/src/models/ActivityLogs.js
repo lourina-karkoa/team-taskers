@@ -1,13 +1,14 @@
 const mongoose = require('mongoose');
+const paginate = require('../plugins/paginate');
 /* 
 create ActivityLog model
-Note:entityType must be the same name as the models of both project , task , note 
+
 */
 
 const activityLogSchema = new mongoose.Schema({
     ActivityType:{
         type:String,
-        required:true,
+        required:[true,"ActivityType is required"],
         enum:[
             'CREATE_PROJECT',
             'CREATE_TASK','UPDATE_TASK', 'project_updated','project_deleted',
@@ -18,17 +19,20 @@ const activityLogSchema = new mongoose.Schema({
     user:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'Users',
-        required:true
+        required:[true,"user is required"]
     },
-    entityType:{
-        type:String,
-        enum:['Project','Task','Note',null],
-        default:null
-    },
-    entityId:{
-        type:mongoose.Schema.Types.ObjectId,
-        // ref:entityType,
-        default:null
+    entityRef:{
+            entityType:{
+                type:String,
+                enum:['Projects','Task','Notes','Users',null],
+                default:null
+        },
+            entityId:{
+                type:mongoose.Schema.Types.ObjectId,
+                default:null,
+                ref:'entityRef.entityType',
+                
+       },
     },
     description:{
         type:String,
@@ -36,6 +40,8 @@ const activityLogSchema = new mongoose.Schema({
     }
 
 },{timestamps:true});
+
+activityLogSchema.plugin(paginate);
 
 const ActivityLogs = mongoose.model('ActivityLog',activityLogSchema);
 
