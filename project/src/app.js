@@ -1,4 +1,11 @@
 const express = require("express");
+
+//////helmet
+const applyHelmet = require('./../src/middlewares/helmet.middleware');
+///rate-time
+const generalLimiter = require('./../src/middlewares/ratelimit.middleware');
+
+
 const app = express();
 const routerAuth = require("./routes/auth.routes")
 
@@ -15,6 +22,13 @@ const errorHandler = require("./middlewares/errorhandler.middleware");
 
 const path = require("path")
 const tasksPath = require("./routes/tasks.routes")
+
+
+/////helmet
+app.use(applyHelmet);
+
+///rate-time
+app.use(generalLimiter);
 
 
 // middlewares

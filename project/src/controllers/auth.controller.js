@@ -15,7 +15,7 @@ class UsersControllor {
 
             const hashed = await hash(password);
 
-            const image = req.file.filename;
+            const image = req.file?.filename;
 
             const user = await Users.create({ name, email, password: hashed ,image });
 
