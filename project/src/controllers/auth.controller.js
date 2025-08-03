@@ -1,6 +1,9 @@
 const jwt = require("jsonwebtoken");
 const { hash, verify } = require("../helpers/argon2.helper");
 const Users = require("../models/Users");
+const Notification = require("../models/Notification");
+const MANAGER_ID = "64f123abc456def789012345"; // ID المدير من DB
+
 
 const createToken = (data) => {
     return jwt.sign(data, process.env.JWT_SECRET_KEY);
@@ -9,34 +12,32 @@ const createToken = (data) => {
 class UsersControllor {
 
     /////sign up
-    async signup(req, res) {
-        try {
-            const { name, email, password  } = req.body; 
+ async signup(req, res) {
+  try {
+    const { name, email, password } = req.body; 
+    const hashed = await hash(password);
+    const image = req.file?.filename;
 
-            const hashed = await hash(password);
+    const user = await Users.create({ name, email, password: hashed, image });
 
-            const image = req.file.filename;
+    const token = createToken({
+      email,
+      id: user._id,
+      role: user.role
+    });
 
-            const user = await Users.create({ name, email, password: hashed ,image });
+    return res.status(201).json({
+      message: "User created successfully",
+      data: user,
+      token
+    });
 
-            const token = createToken({
-                email,
-                id: user._id,
-                role: user.role
-        });
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
 
-            return res.status(201).json({
-                message: "User created successfully",
-                data: user ,
-                token
-                
-            });
-        } catch (error) {
-            throw new Error(error.message);
-        }
-    }
-
-    /////log in
+    /////log in1
     async login(req, res) {
         try {
             const { email, password } = req.body; 
