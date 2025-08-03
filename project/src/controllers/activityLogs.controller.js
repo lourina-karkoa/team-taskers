@@ -75,6 +75,9 @@ class ActivitiesLog {
         try {
 
             const logges = await ActivityLogs.deleteMany();
+            if(logges.deletedCount === 0){
+             return res.status(404).json({ message: "Activity-logs is empty" })
+            }
 
             return res.status(200).json({ message: "Deleted successfully" })
         } catch (error) {

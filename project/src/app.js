@@ -9,6 +9,7 @@ const cors = require("cors");
 
 
 const errorHandler = require("./middlewares/errorhandler.middleware");
+const cleanInput = require('./middlewares/security.middleware');
 
 // const notFound = require("./middlewares/notFound.middleware");
 
@@ -29,6 +30,8 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public/uploads')));
 app.use(express.urlencoded({ extended: true }));
 
+//security
+app.use(cleanInput);
 
 // routers
 

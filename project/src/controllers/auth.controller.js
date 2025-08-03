@@ -40,7 +40,6 @@ class UsersControllor {
     async login(req, res) {
         try {
             const { email, password } = req.body; 
-
             const user = await Users.findOne({ email });
 
             if(!user) {
