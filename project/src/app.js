@@ -7,7 +7,11 @@ const generalLimiter = require('./../src/middlewares/ratelimit.middleware');
 
 
 const app = express();
+///import auth
 const routerAuth = require("./routes/auth.routes")
+///import project
+//project
+const routerProject = require("./routes/projects.routes")
 
 // import
 const logger = require("morgan");
@@ -61,6 +65,8 @@ app.use(errorHandler);
 // auth
 app.use('/api/auth' , routerAuth)
 
+// project
+app.use('/api/project' , routerProject)
 
 
 

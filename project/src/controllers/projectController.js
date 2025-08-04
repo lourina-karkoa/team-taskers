@@ -1,266 +1,94 @@
+
 const Project = require('../models/Project');
-const Task = require('../models/Task');
-const User = require('../models/Users');
-const ActivityLogs = require('../models/ActivityLogs');
+const Users = require('./../models/Users');
 
-// Create new project (Manager only)
-const createProject = async (req, res) => {
-    try {
-        const { title , description, startDate, endDate, teamMembers } = req.body;
+class ProjectController {
+    ////add project
+  async addProject(req, res) {
+        try {
+        const { name, description, startDate, endDate , createdBy } = req.body;
 
-// Verify team members exist
-    if (teamMembers && teamMembers.length > 0) {
-        const validMembers = await User.find({
-            _id: { $in: teamMembers }
+        const newProject = await Project.create({
+            name,
+            description,
+            startDate,
+            endDate,
+            createdBy
         });
-        
-        if (validMembers.length !== teamMembers.length) {
-            return res.status(400).json({
-                success: false,
-                message: 'One or more team members not found or inactive'
-            });
+
+        return res.status(200).json({ message: "Project created successfully", project: newProject });
+
+    }  catch (error) {
+            throw new Error(error.message);
         }
-    }
+  }
 
-    const project = new Project({
-        title,
-        description,
-        startDate,
-        endDate,
-        manager: req.user._id,
-        teamMembers: teamMembers || []
-    });
+  ////get all project
 
-    await project.save();
-    await project.populate('manager teamMembers', 'name email role');
-
-    // Log activity
-    await ActivityLogs.create({
-        ActivityType: 'CREATE_PROJECT',
-        user: req.User._id,
-    });
-
-    res.status(201).json({
-        success: true,
-        message: 'Project created successfully',
-        data: { project }
-    });
-}
-    catch (error) {
-        console.error('Create project error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error',
-        });
-    }
-};
-
-// Get all projects
-const getProjects = async (req, res) => {
+async getAllProjects(req, res) {
     try {
-        const { page = 1, limit = 10, status } = req.query;
-        const skip = (page - 1) * limit;
+        const { page = 1, limit = 3 } = req.query;
 
-    let filter = { isActive: true };
-    
-    // If user is team member, only show projects they're assigned to
-    if (req.User.role === 'TeamMember') {
-        filter.$or = [
-            { teamMembers: req.user._id },
-            { manager: req.user._id }
-        ];
-    }
-
-    if (status) {
-        filter.status = status;
-    }
-
-    const projects = await Project.find(filter)
-    .populate('manager teamMembers', 'name email role')
-    .sort({ createdAt: -1 })
-    .skip(skip)
-    .limit(parseInt(limit));
-
-    const total = await Project.countDocuments(filter);
-
-    res.json({
-        success: true,
-        data: {
-            projects,
-            pagination: {
-                current: parseInt(page),
-                pages: Math.ceil(total / limit),
-                total
-            }
-        }
-    });
-}
-    catch (error) {
-        console.error('Get projects error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
+        const projects = await Project.paginate({
+            page: parseInt(page),
+            limit: parseInt(limit),
+            populate: 'createdBy'
         });
-    }
-};
 
-// Get single project by ID
-const getProject = async (req, res) => {
+        return res.status(200).json({ message: "Done", ...projects });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
+}
+
+
+  ////update project by id
+  async updateProject(req, res) {
     try {
         const { id } = req.params;
+        const { name, description, startDate, endDate } = req.body;
 
-    let filter = { _id: id, isActive: true };
-    
-    // If user is team member, check access
-    if (req.User.role === 'TeamMember') {
-        filter.$or = [
-            { teamMembers: req.user._id },
-            { manager: req.user._id }
-        ];
-    }
 
-    const project = await Project.findOne(filter)
-    .populate('manager teamMembers', 'name email role')
-    .populate({
-        path: 'tasks',
-        populate: {
-            path: 'assignedTo createdBy',
-            select: 'name email'
+        const existingProject = await Project.findById(id);
+        if (!existingProject) {
+        return res.status(404).json({ message: "Project not found" });
         }
-    });
 
-    if (!project) {
-        return res.status(404).json({
-            success: false,
-            message: 'Project not found or access denied'
-        });
+        if (name !== undefined) existingProject.name = name;
+        if (description !== undefined) existingProject.description = description;
+        if (startDate !== undefined) existingProject.startDate = startDate;
+        if (endDate !== undefined) existingProject.endDate = endDate;
+
+
+        await existingProject.save();
+
+        return res.status(200).json({ message: "Project updated successfully", project: existingProject });
+
+    } catch (error) {
+      throw new Error(error.message);
     }
+  }
 
-    res.json({
-        success: true,
-        data: { project }
-    });
+  ///delete project by id
+  async deleteProject(req, res) {
+        try {
+            const id = req.id;
+
+            const project = await Project.deleteOne(id);
+
+            return res.status(200).json({ message: "Done", project })
+
+        } catch (error) {
+           throw new Error(error.message);
+        }
+  }
 }
-    catch (error) {
-        console.error('Get project error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Internal server error'
-        });
-    }
-};
 
-// Update project (Manager only)
-const updateProject = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { title, description, startDate, endDate, status, teamMembers } = req.body;
-        
-        const project = await Project.findOne({ _id: id, isActive: true });
-        if (!project) {
-            return res.status(404).json({
-                success: false,
-                message: 'Project not found'
-            });
-        }
+module.exports = new ProjectController();
 
-    // Verify team members exist if provided
-        if (teamMembers && teamMembers.length > 0) {
-            const validMembers = await User.find({
-                _id: { $in: teamMembers },
-                isActive: true
-            });
 
-        if (validMembers.length !== teamMembers.length) {
-            return res.status(400).json({
-                success: false,
-                message: 'One or more team members not found or inactive'
-            });
-        }
-    }
 
-    // Update project
-        const updatedProject = await Project.findByIdAndUpdate(
-            id,
-            { title, description, startDate, endDate, status, teamMembers },
-            { new: true, runValidators: true }
-        ).populate('manager teamMembers', 'name email role');
 
-    // Log activity
-        await ActivityLogs.create({
-            ActivityType: 'project_updated',
-            user: req.User._id
-        });
 
-        res.json({
-            success: true,
-            message: 'Project updated successfully',
-            data: { project: updatedProject }
-        });
-    }
-        catch (error) {
-            console.error('Update project error:', error);
-            res.status(500).json({
-                success: false,
-                message: 'Internal server error',
-                error: process.env.NODE_ENV === 'development' ? error.message : undefined
-            });
-        }
-    };
 
-// Delete project (Manager only)
-        const deleteProject = async (req, res) => {
-            try {
-                const { id } = req.params;
-                
-                const project = await Project.findOne({ _id: id, isActive: true });
-                if (!project) {
-                    return res.status(404).json({
-                        success: false,
-                        message: 'Project not found'
-                    });
-                }
 
-    // Check if project has active tasks
-    const activeTasks = await Task.countDocuments({ 
-        project: id, 
-        status: { $nin: ["completed", "delayed"] } 
-    });
-
-    if (activeTasks > 0) {
-        return res.status(400).json({
-            success: false,
-            message: 'Cannot delete project with active tasks. Complete or cancel all tasks first.'
-        });
-    }
-
-    // Soft delete
-    await project.save();
-
-    // Log activity
-    await ActivityLogs.create({
-        ActivityType: 'project_deleted',
-        user: req.User._id,
-    });
-
-    res.json({
-        success: true,
-        message: 'Project deleted successfully'
-    });
-}
-catch (error) {
-    console.error('Delete project error:', error);
-    res.status(500).json({
-        success: false,
-        message: 'Internal server error'
-    });
-}
-};
-
-module.exports = {
-    createProject,
-    getProjects,
-    getProject,
-    updateProject,
-    deleteProject
-};
