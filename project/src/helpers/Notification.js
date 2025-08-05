@@ -13,7 +13,6 @@ async function sendNotification(io, userSockets, { userId, type, message, relate
       type,
       message,
       relatedId,
-      read: false,
     });
   }
 }

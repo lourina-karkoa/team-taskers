@@ -1,100 +1,180 @@
-const { body } = require("express-validator");
+const { body, param } = require("express-validator");
 const Task = require("../models/Task");
 const Project = require("../models/Project");
-const User = require ("../models/Users");
+const User = require("../models/Users");
 const mongoose = require("mongoose");
 const validate = require("../middlewares/validate.middleware");
 
+const getTaskByIdValidate = [
+  param("id")
+    .custom((value) => {
+      if (!mongoose.Types.ObjectId.isValid(value)) {
+        throw new Error("Invalid task ID");
+      }
+      return true;
+    })
+    .bail()
+    .custom(async (value, { req }) => {
+      const task = await Task.findById(value);
+      if (!task) {
+        throw new Error("Task not found");
+      }
+
+      if (req.user.role === "TeamMember") {
+        if (task.assignedTo !== req.user._id) {
+          throw new Error("You are not allowed to access this task");
+        }
+      }
+
+      return true;
+    }),
+
+  validate,
+];
 
 const createTaskValidate = [
-  body("title")
-    .isString().withMessage("title must be string"),
+  body("title").isString().withMessage("title must be string"),
 
-  body("description")
-    .isString().withMessage("description must be string"),
+  body("description").isString().withMessage("description must be string"),
 
-  body("dueDate")
-    .isISO8601().withMessage("Invalid date"),
+  body("startDate").isISO8601().withMessage("Invalid date"),
+
+  body("dueDate").isISO8601().withMessage("Invalid date")
+  .bail()
+    .custom((value, { req }) => {
+      if (new Date(value) <= new Date(req.body.startDate)) {
+        throw new Error("dueDate must be after startDate");
+      }
+      return true;
+    }), 
 
   body("priority")
     .optional()
-    .isIn(["low", "medium", "high"]).withMessage("Priority must be low, medium, or high"),
+    .isIn(["low", "medium", "high"])
+    .withMessage("Priority must be low, medium, or high"),
 
   body("status")
     .optional()
-    .isIn(["in_progress", "completed", "delayed"]).withMessage("Invalid status"),
+    .isIn(["in_progress", "completed", "delayed"])
+    .withMessage("Invalid status"),
 
-  body("projectId")
-    .custom(async (value) => {
-        if (!mongoose.Types.ObjectId.isValid(value)) {
-             throw new Error("Invalid projectId");
-        }
+  body("projectId").custom(async (value) => {
+    if (!mongoose.Types.ObjectId.isValid(value)) {
+      throw new Error("Invalid projectId");
+    }
 
-        const project = await Project.findById(value);
-        if (!project) {
-            throw new Error("Project not found");
-        }
+    const project = await Project.findById(value);
+    if (!project) {
+      throw new Error("Project not found");
+    }
 
-        return true;
-    }),
+    return true;
+  }),
 
+  body("assignedTo").custom(async (value) => {
+    if (!mongoose.Types.ObjectId.isValid(value)) {
+      throw new Error("Invalid userId");
+    }
 
-  body("assignedTo")
-    .custom(async (value) => {
-        if (!mongoose.Types.ObjectId.isValid(value)) {
-             throw new Error("Invalid userId");
-        }
+    const user = await User.findById(value);
+    if (!user) {
+      throw new Error("User not found");
+    }
 
-        const user = await User.findById(value);
-        if (!user) {
-            throw new Error("User not found");
-        }
+    return true;
+  }),
 
-        return true;
-    }),
-
-
-  validate
+  validate,
 ];
 
 const updateTaskValidate = [
-  body("title").optional().isString().withMessage("title must be string"),
-  body("description").optional().isString().withMessage("description must be string"),
-  body("dueDate").optional().isISO8601().withMessage("Invalid date"),
-  body("priority").optional().isIn(["low", "medium", "high"]).withMessage("Invalid priority"),
-  body("status").optional().isIn(["in_progress", "completed", "delayed"]).withMessage("Invalid status"),
-  body("projectId").optional()
+  param("id")
+    .custom((value) => {
+      if (!mongoose.Types.ObjectId.isValid(value)) {
+        throw new Error("Invalid Task ID");
+      }
+      return true;
+    })
+    .bail()
     .custom(async (value) => {
-        if (!mongoose.Types.ObjectId.isValid(value)) {
-             throw new Error("Invalid projectId");
-        }
-
-        const project = await Project.findById(value);
-        if (!project) {
-            throw new Error("Project not found");
-        }
-
-        return true;
+      const task = await Task.findById(value);
+      if (!task) {
+        throw new Error("Task not found");
+      }
+      return true;
     }),
-  body("assignedTo").optional()
-     .custom(async (value) => {
-        if (!mongoose.Types.ObjectId.isValid(value)) {
-             throw new Error("Invalid userId");
-        }
 
-        const user = await User.findById(value);
-        if (!user) {
-            throw new Error("User not found");
-        }
+  body("status")
+    .if((value, { req }) => req.user.role === "TeamMember" || req.user.role === "Manager")
+    .notEmpty()
+    .withMessage("Status is required")
+    .bail()
+    .isIn(["in_progress", "completed", "delayed"])
+    .withMessage("Invalid status value"),
 
-        return true;
-     }),
-  validate
+  body("title")
+    .if((value, { req }) => req.user.role === "Manager")
+    .optional()
+    .isString()
+    .withMessage("title must be string"),
+
+  body("description")
+    .if((value, { req }) => req.user.role === "Manager")
+    .optional()
+    .isString()
+    .withMessage("description must be string"),
+
+  body("startDate")
+    .if((value, { req }) => req.user.role === "Manager")
+    .optional()
+    .isISO8601()
+    .withMessage("Invalid date"),
+
+  body("dueDate")
+    .if((value, { req }) => req.user.role === "Manager")
+    .optional()
+    .isISO8601()
+    .withMessage("Invalid date")
+    .custom((value, { req }) => {
+      if (req.body.startDate && new Date(value) <= new Date(req.body.startDate)) {
+        throw new Error("Due date must be after start date");
+      }
+      return true;
+    }),
+
+  body("priority")
+    .if((value, { req }) => req.user.role === "Manager")
+    .optional()
+    .isIn(["low", "medium", "high"])
+    .withMessage("Invalid priority"),
+
+  validate,
+];
+
+const deleteTaskValidate = [
+  param("id")
+    .custom((value) => {
+      if (!mongoose.Types.ObjectId.isValid(value)) {
+        throw new Error("Invalid Task ID");
+      }
+      return true;
+    })
+    .bail()
+    .custom(async (value) => {
+      const user = await Task.findById(value);
+      if (!user) {
+        throw new Error("Task not found");
+      }
+      return true;
+    }),
+
+  validate,
 ];
 
 
-
 module.exports = {
+  getTaskByIdValidate,
   createTaskValidate,
-  updateTaskValidate
+  updateTaskValidate,
+  deleteTaskValidate,
 };

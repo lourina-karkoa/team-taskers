@@ -1,30 +1,29 @@
 const express = require("express");
 const router = express.Router();
-
 const auth = require ("../middlewares/auth.middleware");
 const role = require ("../middlewares/role.middleware")
-
-const { getAllTaskes , getTaskById , createTask,updateTask,deleteTask } = require("../controllers/tasks.controller");
-const { createTaskValidate, updateTaskValidate } = require("../validation/tasks.validate")
+const TasksController = require("../controllers/tasks.controller");
+const { getTaskByIdValidate,createTaskValidate, updateTaskValidate , deleteTaskValidate } = require("../validation/tasks.validate")
 
 
 // Get
-router.get("/", [auth, role(["Manager"])], getAllTaskes );
+router.get("/", [auth, role(["Manager"])],TasksController.getAllTaskes );
 
-router.get("/:id", [auth, role(["TeamMember","Manager"])], getTaskById);
+router.get("/:id", [auth, role(["TeamMember","Manager"]), ...getTaskByIdValidate], TasksController.getTaskById);
 
 
 // Post
-router.post("/add", [auth, role(["Manager"]),...createTaskValidate],createTask );
+router.post("/add", [auth, role(["Manager"]),...createTaskValidate],TasksController.createTask );
 
 
 // Put
-router.put("/update/:id", [auth, role(["TeamMember","Manager"]),...updateTaskValidate],updateTask );
+router.put("/:id", [auth, role(["Manager", "TeamMember"]), ...updateTaskValidate], TasksController.updateTask);
 
 
 // Delete
-router.delete("/delete/:id", [auth, role(["Manager"])], deleteTask );
+router.delete("/:id", [auth, role(["Manager"]),...deleteTaskValidate], TasksController.deleteTask);
 
+router.delete("/", [auth, role(["Manager"]),...deleteTaskValidate], TasksController.deleteAllTasks);
 
 
 module.exports = router;
