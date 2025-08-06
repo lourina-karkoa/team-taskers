@@ -1,6 +1,9 @@
 const jwt = require("jsonwebtoken");
 const { hash, verify } = require("../helpers/argon2.helper");
 const Users = require("../models/Users");
+const Notification = require("../models/Notification");
+const MANAGER_ID = "64f123abc456def789012345"; // ID المدير من DB
+
 
 const createToken = (data) => {
     return jwt.sign(data, process.env.JWT_SECRET_KEY);
@@ -9,6 +12,7 @@ const createToken = (data) => {
 class UsersControllor {
 
     /////sign up
+
     async signup(req, res) {
         try {
             const { name, email, password  } = req.body; 
@@ -36,7 +40,8 @@ class UsersControllor {
         }
     }
 
-    /////log in
+
+    /////log in1
     async login(req, res) {
         try {
             const { email, password } = req.body; 

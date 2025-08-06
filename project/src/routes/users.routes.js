@@ -27,9 +27,9 @@ router.put("/update", [auth, upload.single("image") ,...updateProfileValidate], 
 router.put("/update-password", [...updatePasswordValidate], usersController.updatePassword);
 
 // Delete
-router.delete("/:id", [auth, role(["Manager"])], [...deleteUserValidate], usersController.deleteUser);
+// router.delete("/:id", [auth, role(["Manager"])], [...deleteUserValidate], usersController.deleteUser);
 
-router.delete("/", [auth, role(["Manager"])], usersController.deleteAllUser);
+// router.delete("/", [auth, role(["Manager"])], usersController.deleteAllUser);
 
 
 module.exports = router
