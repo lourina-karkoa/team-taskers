@@ -1,4 +1,3 @@
-
 const Project = require('../models/Project');
 const Users = require('./../models/Users');
 
@@ -85,9 +84,6 @@ async getAllProjects(req, res) {
 }
 
 module.exports = new ProjectController();
-
-
-
 
 
 

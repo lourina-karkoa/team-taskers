@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 
 const Notes = mongoose.model("Notes", new mongoose.Schema({
-    user: { 
+    author: { 
         type: mongoose.Schema.Types.ObjectId, 
-        ref: 'User', 
+        ref: 'Users', 
         required: true 
     },
     task: { 

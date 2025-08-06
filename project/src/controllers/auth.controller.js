@@ -1,9 +1,7 @@
 const jwt = require("jsonwebtoken");
 const { hash, verify } = require("../helpers/argon2.helper");
 const Users = require("../models/Users");
-const Notification = require("../models/Notification");
-const MANAGER_ID = "64f123abc456def789012345"; // ID المدير من DB
-
+const logActivity = require('../helpers/logActivity.helper');
 
 const createToken = (data) => {
     return jwt.sign(data, process.env.JWT_SECRET_KEY);
@@ -45,7 +43,6 @@ class UsersControllor {
     async login(req, res) {
         try {
             const { email, password } = req.body; 
-
             const user = await Users.findOne({ email });
 
             if(!user) {
@@ -61,7 +58,8 @@ class UsersControllor {
             const token = createToken({ email, id: user._id, role: user.role })
 
             const data = await Users.findOne({ email }).select("-password")
-
+             // Log activity
+            await logActivity('USER_LOGIN',user.id,'Users',user.id);
             return res.status(201).json({ message: "Done", data, token })
         } catch (error) {
             throw new Error(error.message);
@@ -72,7 +70,9 @@ class UsersControllor {
     ////////log out
     async logout(req, res) {
         try {
-            return res.status(200).json({ message: "Done" })
+            // Log activity
+            await logActivity('USER_LOGOUT',req.user.id,'Users',req.user.id)
+            return res.status(200).json({ message: "Done" });
         } catch (error) {
             throw new Error(error.message);
         }

@@ -1,5 +1,5 @@
 const pdfPrinter = require('pdfmake');
-const path = requrie('path');
+const path = require('path');
 
 const fonts ={
     Roboto:{

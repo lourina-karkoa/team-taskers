@@ -1,4 +1,3 @@
-
 const express = require('express');
 const router = express.Router();
 ///controller
@@ -15,6 +14,9 @@ router.get( "/" ,[auth, role(["TeamMember","Manager"])],projectController.getAll
 ////add new project
 router.post( "/add" ,[auth, role(["Manager"])], validateProject, projectController.addProject);
 
+// Get single project (accessible to all authenticated users)
+router.get('/:id',validateObjectId, getProject);
+
 //////update project by id
 router.put("/update/:id", [auth ,role (["Manager"])], validateProject,projectController.updateProject)
 
@@ -22,3 +24,4 @@ router.put("/update/:id", [auth ,role (["Manager"])], validateProject,projectCon
 router.delete("/delete/:id",[auth , role(["Manager"])], projectController.deleteProject);
 
 module.exports = router;
+

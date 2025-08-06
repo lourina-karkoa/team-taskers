@@ -9,6 +9,12 @@ const logActivity = async ( Activity, userId, entityType, entityId ) => {
             case 'CREATE_PROJECT':
                 description = "A new Project has been created"
                 break;
+            case 'PROJECT_UPDATE':
+                description = "A new Project has been modified"
+                break;
+            case 'PROJECT_DELETED':
+                description = "A new Project has been deleted"
+                break;
             case 'CREATE_TASK':
                 description = "A new Task has been created"
                 break;
@@ -20,6 +26,9 @@ const logActivity = async ( Activity, userId, entityType, entityId ) => {
                 break;
             case 'USER_LOGIN':
                 description = "You are logged in"
+                break;
+            case 'USER_LOGOUT':
+                description = "You log out"
                 break;
             default:
                 description = "Unknown activity !"
