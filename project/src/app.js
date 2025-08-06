@@ -1,6 +1,17 @@
 const express = require("express");
+
+//////helmet
+const applyHelmet = require('./../src/middlewares/helmet.middleware');
+///rate-time
+const generalLimiter = require('./../src/middlewares/ratelimit.middleware');
+
+
 const app = express();
+///import auth
 const routerAuth = require("./routes/auth.routes")
+///import project
+//project
+const routerProject = require("./routes/projects.routes")
 
 // import
 const logger = require("morgan");
@@ -15,6 +26,13 @@ const errorHandler = require("./middlewares/errorhandler.middleware");
 
 const path = require("path")
 const tasksPath = require("./routes/tasks.routes")
+
+
+/////helmet
+app.use(applyHelmet);
+
+///rate-time
+app.use(generalLimiter);
 
 
 // middlewares
@@ -47,6 +65,8 @@ app.use(errorHandler);
 // auth
 app.use('/api/auth' , routerAuth)
 
+// project
+app.use('/api/project' , routerProject)
 
 
 

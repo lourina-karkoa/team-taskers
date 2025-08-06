@@ -12,30 +12,34 @@ const createToken = (data) => {
 class UsersControllor {
 
     /////sign up
- async signup(req, res) {
-  try {
-    const { name, email, password } = req.body; 
-    const hashed = await hash(password);
-    const image = req.file?.filename;
 
-    const user = await Users.create({ name, email, password: hashed, image });
+    async signup(req, res) {
+        try {
+            const { name, email, password  } = req.body; 
 
-    const token = createToken({
-      email,
-      id: user._id,
-      role: user.role
-    });
+            const hashed = await hash(password);
 
-    return res.status(201).json({
-      message: "User created successfully",
-      data: user,
-      token
-    });
+            const image = req.file?.filename;
 
-  } catch (error) {
-    throw new Error(error.message);
-  }
-}
+            const user = await Users.create({ name, email, password: hashed ,image });
+
+            const token = createToken({
+                email,
+                id: user._id,
+                role: user.role
+        });
+
+            return res.status(201).json({
+                message: "User created successfully",
+                data: user ,
+                token
+                
+            });
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
+
 
     /////log in1
     async login(req, res) {
