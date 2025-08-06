@@ -23,7 +23,7 @@ router.put("/:id", [auth, role(["Manager", "TeamMember"]), ...updateTaskValidate
 // Delete
 router.delete("/:id", [auth, role(["Manager"]),...deleteTaskValidate], TasksController.deleteTask);
 
-router.delete("/", [auth, role(["Manager"]),...deleteTaskValidate], TasksController.deleteAllTasks);
+router.delete("/", [auth, role(["Manager"])], TasksController.deleteAllTasks);
 
 
 module.exports = router;

@@ -21,7 +21,7 @@ const getTaskByIdValidate = [
       }
 
       if (req.user.role === "TeamMember") {
-        if (task.assignedTo !== req.user._id) {
+        if (!task.assignedTo.equals(req.user.id)) {
           throw new Error("You are not allowed to access this task");
         }
       }

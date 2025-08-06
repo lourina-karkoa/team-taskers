@@ -3,6 +3,7 @@ const Task = require("../models/Task");
 const sendNotification = require("../helpers/Notification");
 const Notes = require("../models/Notes");
 const Project = require("../models/Project");
+const ActivityLogs = require("../models/ActivityLogs");
 
 
 
@@ -33,7 +34,7 @@ class TasksController {
 
                   const task = await Task.findById(id).select(req.user.role === "TeamMember" ? "-projectId" : "");
 
-                  return res.status(200).json({ state: "success", message: "All tasks", task: task });
+                  return res.status(200).json({ state: "success", message: "Specific tasks", task: task });
 
             } catch (error) {
                   throw new Error(error.message);
@@ -79,16 +80,16 @@ class TasksController {
       async updateTask(req, res) {
             try {
                   const taskId = req.params.id;
-                  const updates = req.body;
+                  let updates = req.body;
 
                   if (req.user.role === "TeamMember") {
-                        if (!("status" in updates)) {
+                        if (!updates.status || Object.keys(updates).length > 1) {
                               return res.status(403).json({
                                     state: "error",
-                                    message: "You can only update the task status"
+                                    message: "You can only update the task status",
+                                    data: null
                               });
                         }
-
                         updates = { status: updates.status };
                   }
 
