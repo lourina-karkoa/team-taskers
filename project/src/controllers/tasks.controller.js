@@ -1,99 +1,207 @@
 const mongoose = require("mongoose");
 const Task = require("../models/Task");
+const sendNotification = require("../helpers/Notification");
+const Notes = require("../models/Notes");
+const Project = require("../models/Project");
+const ActivityLogs = require("../models/ActivityLogs");
 
-const asyncHandler = require("express-async-handler");
-const logActivity = require('../helpers/logActivity.helper');
 
-const getAllTaskes = asyncHandler (async(req, res) => {
-            // const {status , dueDate ,projectId ,assignedTo } = req.query;
-            let tasks ;
-            //if (status && dueDate && projectId && assignedTo){
-                 //tasks = await Task.find({ شي للفلترة  }).populate("projectId").populate("assignedTo") ; }
-            
-            tasks = await Task.find( ).populate("projectId").populate("assignedTo");
-      
-            return res.status(200).json(tasks);
-    } );
 
-const getTaskById = asyncHandler (async(req, res) => {
+class TasksController {
+      async getAllTaskes(req, res) {
+            try {
+                  // const {status , dueDate ,projectId ,assignedTo } = req.query;
 
-            const task = await Task.findById(req.params.id).select(req.user.role === "TeamMember" ? "-projectId" : "");
-            if (task) {
-                  return res.status(200).json(task);
-            }else{
-                  return res.status(404).json({message : "Task not Found"})
+                  //if (status && dueDate && projectId && assignedTo){
+                  //tasks = await Task.find({ شي للفلترة  }).populate("projectId").populate("assignedTo") ; }
+
+                  const tasks = await Task.find()
+                        .populate({
+                              path: "projectId",
+                              select: "title description _id"
+                        })
+                        .populate("assignedTo", "name email role image");
+                  return res.status(200).json({ state: "success", message: "All tasks", Alltasks: tasks });
+
+            } catch (error) {
+                  throw new Error(error.message);
             }
-    } );
+      };
+      async getTaskById(req, res) {
+            try {
 
-const createTask = asyncHandler (async(req, res) => {
-        
-      const task = new Task ({
-            title : req.body.title ,
-            description : req.body.description ,
-            dueDate: req.body.dueDate  ,
-            priority : req.body.priority ,
-            status :  req.body.status ,
-            projectId : req.body.projectId ,
-            assignedTo : req.body.assignedTo
-      });
+                  const id = req.params.id
 
-      // Log activity
-      await logActivity('CREATE_TASK',req.user.id,'Task',task.id);
+                  const task = await Task.findById(id).select(req.user.role === "TeamMember" ? "-projectId" : "");
 
-      const result =  await task.save();
-      res.status(201).json(result);
-            
-    } );
+                  return res.status(200).json({ state: "success", message: "Specific tasks", task: task });
 
-const updateTask = asyncHandler (async(req, res) => {
+            } catch (error) {
+                  throw new Error(error.message);
 
-            let updateData = {};
-
-            if ("status" in req.body && req.user.role === "TeamMember") {
-                  updateData = { status: req.body.status };
-            } else if (req.user.role === "Manager") {
-                  updateData = req.body;
-            }else {
-                  return res.status(403).json({ message: "Not allowed to update these fields." });
-            } 
-
-           const updatedTask = await Task.findByIdAndUpdate(
-                            req.params.id,
-                            { $set: updateData },
-                            {new: true}
-                            ).select(req.user.role === "TeamMember" ? "-projectId" : "");
- 
-           if (!updatedTask) {
-           return res.status(404).json({ message: "Task not found." });
-           }
-
-           // Log activity
-           await logActivity('UPDATE_TASK',req.user.id,'Task',updatedTask.id);
-
-           return res.status(200).json(updatedTask);
-
-    });
-
-const deleteTask = asyncHandler (async(req, res) => {
-
-            const task = await Task.findById(req.params.id);
-            if (task) {
-                  await Task.findByIdAndDelete(req.params.id);
-                  return res.status(200).json({message : "Task has been deleted"});
-            }else{
-                  return res.status(404).json({message : "Task not Found"})
             }
-    } );
+
+      };
+
+      async createTask(req, res) {
+            try {
+
+                  const { title, description, startDate, dueDate, priority, status, projectId, assignedTo } = req.body;
+
+                  const task = await Task.create({
+                        title,
+                        description,
+                        startDate,
+                        dueDate,
+                        priority,
+                        status,
+                        projectId,
+                        assignedTo
+                  });
+
+                  // send Notifcation
+                  const io = req.app.get("io");
+                  const userSockets = req.app.get("userSockets");
+
+                  await sendNotification(io, userSockets, {
+                        userId: assignedTo,
+                        type: "new_task",
+                        message: `New task assigned ${title}`,
+                        relatedId: task._id
+                  });
+
+                  return res.status(200).json({ state: "success", message: "Added task successfully", task });
+
+            } catch (error) {
+                  throw new Error(error.message);
+            }
+
+      };
+
+      async updateTask(req, res) {
+            try {
+                  const taskId = req.params.id;
+                  let updates = req.body;
+
+                  if (req.user.role === "TeamMember") {
+                        if (!updates.status || Object.keys(updates).length > 1) {
+                              return res.status(403).json({
+                                    state: "error",
+                                    message: "You can only update the task status",
+                                    data: null
+                              });
+                        }
+                        updates = { status: updates.status };
+                  }
+
+                  const updatedTask = await Task.findByIdAndUpdate(
+                        taskId,
+                        { $set: updates },
+                        { new: true }
+                  );
+
+                  // sendNotification to manger
+                  const editingUserName = req.user.name;
+                  const project = await Project.findById(updatedTask.projectId).populate("manager");
+                  const managerId = project?.manager?._id;
+
+                  if (managerId) {
+                        const io = req.app.get("io");
+                        const userSockets = req.app.get("userSockets");
+
+                        await sendNotification(io, userSockets, {
+                              userId: managerId,
+                              type: "task_updated",
+                              message: `Task "${updatedTask.title}" was updated by ${editingUserName}`,
+                              relatedId: updatedTask._id
+                        });
+                  }
+
+                  return res.status(200).json({
+                        state: "success",
+                        message: "Task updated successfully",
+                        data: updatedTask
+                  });
+
+            } catch (error) {
+                  throw new Error(error.message);
+            }
+      }
 
 
-    
-module.exports ={
-      getAllTaskes,
-      getTaskById,
-      createTask,
-      updateTask,
-      deleteTask
+      async deleteTask(req, res) {
+            try {
+                  const id = req.params.id; // Task ID
+
+                  const noteIds = await Notes.find({ task: id }).distinct("_id");
+                  await Notes.deleteMany({ task: id });
+
+                  await ActivityLogs.deleteMany({
+                        "entityRef.entityType": "Task",
+                        "entityRef.entityId": id
+                  });
+
+                  if (noteIds.length > 0) {
+                        await ActivityLogs.deleteMany({
+                              "entityRef.entityType": "Notes",
+                              "entityRef.entityId": { $in: noteIds }
+                        });
+                  }
+
+                  await Task.findByIdAndDelete(id);
+
+                  return res.status(200).json({
+                        state: "success",
+                        message: "Task and related data deleted successfully",
+                        data: {},
+                  });
+
+            } catch (error) {
+                  throw new Error(error.message);
+            }
+      }
+
+      async deleteAllTasks(req, res) {
+            try {
+                  const taskIds = await Task.find().distinct("_id");
+
+                  if (taskIds.length === 0) {
+                        return res.status(200).json({
+                              state: "success",
+                              message: "No tasks found to delete",
+                              data: {}
+                        });
+                  }
+
+                  const noteIds = await Notes.find({ task: { $in: taskIds } }).distinct("_id");
+
+                  await Notes.deleteMany({ task: { $in: taskIds } });
+
+                  await ActivityLogs.deleteMany({
+                        "entityRef.entityType": "Task",
+                        "entityRef.entityId": { $in: taskIds }
+                  });
+
+                  if (noteIds.length > 0) {
+                        await ActivityLogs.deleteMany({
+                              "entityRef.entityType": "Notes",
+                              "entityRef.entityId": { $in: noteIds }
+                        });
+                  }
+
+                  await Task.deleteMany({});
+
+                  return res.status(200).json({
+                        state: "success",
+                        message: "All tasks and related data deleted successfully",
+                        data: {}
+                  });
+
+            } catch (error) {
+                  throw new Error(error.message);
+            }
+      }
+
+
 }
-
-
-
+module.exports = new TasksController();

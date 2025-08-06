@@ -1,27 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const {
-    createProject,
-    getProjects,
-    getProject,
-    updateProject,
-    deleteProject
-} = require('../controllers/projectController');
-const { authenticateToken, requireManager, logActivity } = require('../middlewares/auth.middleware');
-const { validateProject } = require('../validation/project.validate');
+///controller
+const projectController = require('./../controllers/projectController');
+////validation
+const { validateProject } = require('./../validation/project.validate');
+///middleware
+const role = require('./../middlewares/role.middleware');
+const auth = require('./../middlewares/auth.middleware');
 
-// All routes require authentication
-router.use(authenticateToken);
+////get all project
+router.get( "/" ,[auth, role(["TeamMember","Manager"])],projectController.getAllProjects)
 
-// Get all projects (accessible to all authenticated users)
-router.get('/', getProjects);
+////add new project
+router.post( "/add" ,[auth, role(["Manager"])], validateProject, projectController.addProject);
 
 // Get single project (accessible to all authenticated users)
 router.get('/:id',validateObjectId, getProject);
 
-// Manager-only routes
-router.post('/', requireManager, validateProject, logActivity('CREATE_PROJECT', 'Project'), createProject);
-router.put('/:id', requireManager, validateObjectId, validateProject, logActivity('project_updated', 'Project'), updateProject);
-router.delete('/:id', requireManager, validateObjectId, logActivity('project_deleted', 'Project'), deleteProject);
+//////update project by id
+router.put("/update/:id", [auth ,role (["Manager"])], validateProject,projectController.updateProject)
+
+////////delete project by id
+router.delete("/delete/:id",[auth , role(["Manager"])], projectController.deleteProject);
 
 module.exports = router;
+
