@@ -4,7 +4,7 @@ const router = express.Router();
 const auth = require ("../middlewares/auth.middleware");
 const role = require ("../middlewares/role.middleware")
 
-const { getAllTaskes , getTaskById , createTask,updateTask,deleteTask } = require("../controllers/tasks.controller");
+const { getAllTaskes , getTaskById , createTask,updateTask,deleteTask,filterTasks } = require("../controllers/tasks.controller");
 const { createTaskValidate, updateTaskValidate } = require("../validation/tasks.validate")
 
 

@@ -5,7 +5,7 @@ module.exports = function paginate(schema) {
 
         const data = 
             populate 
-            ? await this.find(filter).skip(skip).limit(limit).sort(sort).select([...select]).populate(populate, "-password -__v")
+            ? await this.find(filter).skip(skip).limit(limit).sort(sort).select([...select]).populate(populate)
             : await this.find(filter).skip(skip).limit(limit).sort(sort).select([...select]);
 
             

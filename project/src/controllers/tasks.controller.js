@@ -86,13 +86,16 @@ const deleteTask = asyncHandler (async(req, res) => {
     } );
 
 
+
+
     
 module.exports ={
       getAllTaskes,
       getTaskById,
       createTask,
       updateTask,
-      deleteTask
+      deleteTask,
+    
 }
 
 
