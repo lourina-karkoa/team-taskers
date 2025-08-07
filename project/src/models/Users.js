@@ -30,7 +30,7 @@ userSchema.pre('save', function(next) {
 
         const firstLetter = this.name.charAt(0).toUpperCase();
         
-        this.image = `https://via.placeholder.com/150/CCCCCC/FFFFFF?text=${firstLetter}`;
+        this.image = `https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2264922221.jpg`;
 
     }
     next(); 
