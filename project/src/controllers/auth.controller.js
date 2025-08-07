@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const { hash, verify } = require("../helpers/argon2.helper");
 const Users = require("../models/Users");
 const logActivity = require('../helpers/logActivity.helper');
+
 const createToken = (data) => {
     return jwt.sign(data, process.env.JWT_SECRET_KEY);
 }
@@ -9,13 +10,14 @@ const createToken = (data) => {
 class UsersControllor {
 
     /////sign up
+
     async signup(req, res) {
         try {
             const { name, email, password  } = req.body; 
 
             const hashed = await hash(password);
 
-            const image = req.file.filename;
+            const image = req.file?.filename;
 
             const user = await Users.create({ name, email, password: hashed ,image });
 
@@ -36,7 +38,8 @@ class UsersControllor {
         }
     }
 
-    /////log in
+
+    /////log in1
     async login(req, res) {
         try {
             const { email, password } = req.body; 

@@ -123,62 +123,58 @@ class UsersControllor {
         }
     }
 
+    // we dont need it 
+    // deleteUser = async (req, res) => {
+    //     try {
+    //         const id = req.params.id
 
-    deleteUser = async (req, res) => {
-        try {
-            const id = req.params.id
+    //         const userExist = await users.findById(id);
 
-            const userExist = await users.findById(id);
+    //         if (!userExist) {
+    //             return res.status(400).json({
+    //                 state: "failed",
+    //                 message: "this user is not valied",
+    //                 data: null,
+    //             });
+    //         }
 
-            if (!userExist) {
-                return res.status(400).json({
-                    state: "failed",
-                    message: "this user is not valied",
-                    data: null,
-                });
-            }
+    //         await Task.deleteMany({ assignedTo: id });
+    //         await Notes.deleteMany({ user: id });
+    //         await Projects.updateMany(
+    //             { teamMembers: id },
+    //             { $pull: { teamMembers: id } }
+    //         );
+    //         await ActivityLogs.deleteMany({ user: id });
+    //         await users.findByIdAndDelete(id);
+    //         return res.status(200).json({
+    //             state: "success",
+    //             message: "delete user is successfully",
+    //             data: {},
+    //         });
+    //     } catch (error) {
+    //         throw new Error(error.message);
+    //     }
+    // };
+    // deleteAllUser = async (req, res) => {
+    //     try {
 
-            await Task.deleteMany({ assignedTo: id });
-            await Notes.deleteMany({ user: id });
-            await Projects.updateMany(
-                { teamMembers: id },
-                { $pull: { teamMembers: id } }
-            );
-            await ActivityLogs.deleteMany({ user: id });
-            await users.findByIdAndDelete(id);
-            return res.status(200).json({
-                state: "success",
-                message: "delete user is successfully",
-                data: {},
-            });
-        } catch (error) {
-            return res
-                .status(500)
-                .json({ state: "failed", message: error.message, data: null });
-        }
-    };
-    deleteAllUser = async (req, res) => {
-        try {
-
-            await Projects.updateMany(
-                {},
-                { $set: { teamMembers: [] } }
-            );
-            await Task.deleteMany({});
-            await Notes.deleteMany({ role: { $ne: 'Manager' } });
-            await ActivityLogs.deleteMany({ role: { $ne: 'Manager' } });
-            await users.deleteMany({ role: { $ne: 'Manager' } });
-            return res.status(200).json({
-                state: "success",
-                message: "delete All Users(TeamMember) is Done",
-                data: {},
-            });
-        } catch (error) {
-            return res
-                .status(500)
-                .json({ state: "failed", message: error.message, data: null });
-        }
-    };
+    //         await Projects.updateMany(
+    //             {},
+    //             { $set: { teamMembers: [] } }
+    //         );
+    //         await Task.deleteMany({});
+    //         await Notes.deleteMany({ role: { $ne: 'Manager' } });
+    //         await ActivityLogs.deleteMany({ role: { $ne: 'Manager' } });
+    //         await users.deleteMany({ role: { $ne: 'Manager' } });
+    //         return res.status(200).json({
+    //             state: "success",
+    //             message: "delete All Users(TeamMember) is Done",
+    //             data: {},
+    //         });
+    //     } catch (error) {
+    //         throw new Error(error.message);
+    //     }
+    // };
 }
 module.exports = new UsersControllor();
 
