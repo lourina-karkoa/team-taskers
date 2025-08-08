@@ -28,6 +28,7 @@ class UsersControllor {
         });
 
             return res.status(201).json({
+                state: "success",
                 message: "User created successfully",
                 data: user ,
                 token
@@ -60,7 +61,8 @@ class UsersControllor {
             const data = await Users.findOne({ email }).select("-password")
              // Log activity
             await logActivity('USER_LOGIN',user.id,'Users',user.id);
-            return res.status(201).json({ message: "Done", data, token })
+
+            return res.status(201).json({state: "success", message: "User access successfully", data, token })
         } catch (error) {
             throw new Error(error.message);
         }
@@ -72,7 +74,7 @@ class UsersControllor {
         try {
             // Log activity
             await logActivity('USER_LOGOUT',req.user.id,'Users',req.user.id)
-            return res.status(200).json({ message: "Done" });
+            return res.status(200).json({state: "success", message: "User logout sucessfully" });
         } catch (error) {
             throw new Error(error.message);
         }
