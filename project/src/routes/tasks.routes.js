@@ -9,7 +9,7 @@ const { getTaskByIdValidate,createTaskValidate, updateTaskValidate , deleteTaskV
 // Get
 router.get("/", [auth, role(["Manager"])],TasksController.getAllTaskes );
 
-router.get("/filterTasks",auth,TasksController.filterTasks);
+router.get("/filterTasks",[auth, role(["Manager"])],TasksController.filterTasks);
 
 router.get("/:id", [auth, role(["TeamMember","Manager"]), ...getTaskByIdValidate], TasksController.getTaskById);
 

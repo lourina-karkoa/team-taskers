@@ -72,7 +72,7 @@ class UsersControllor {
         try {
             // Log activity
             await logActivity('USER_LOGOUT',req.user.id,'Users',req.user.id)
-            return res.status(200).json({ message: "Done" });
+            return res.status(200).json({status:"success", message: "Done" });
         } catch (error) {
             throw new Error(error.message);
         }

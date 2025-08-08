@@ -6,10 +6,10 @@ const NoteSchema =  new mongoose.Schema({
         ref: 'Users', 
         required: true 
     },
-    importNote:{
-        type:mongoose.Schema.Types.Boolean,
-        required:true
-    },
+    // importNote:{
+    //     type:mongoose.Schema.Types.Boolean,
+    //     required:true
+    // },
     task: { 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Task', 

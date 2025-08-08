@@ -6,6 +6,7 @@ const Project = require("../models/Project");
 const ActivityLogs = require("../models/ActivityLogs");
 const logActivity = require('../helpers/logActivity.helper');
 
+
 class TasksController {
       async getAllTaskes(req, res) {
             try {
@@ -220,8 +221,6 @@ class TasksController {
             if(deliveryDate){
                   filter.dueDate = {...({$lte:new Date(deliveryDate)})}
             }
-            console.log(filter);
-            
 
             const tasks = await Task.paginate({filter:filter,populatePath:'projectId assignedTo',populateSel:'name email role name',page:page})
 

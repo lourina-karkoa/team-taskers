@@ -11,7 +11,7 @@ class Note{
    addNote = async(req,res)=>{
         try{
             const taskId = req.params.taskId;
-            const {content,importNote} = req.body;
+            const {content} = req.body;
             
             const isExist  = await Task.findById(taskId);
             if(!isExist){
@@ -22,7 +22,7 @@ class Note{
                 task:taskId,
                 author:req.user.id,
                 content,
-                importNote
+                // importNote
             });
 
             await note.save();
