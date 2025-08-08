@@ -37,10 +37,16 @@ function rejectIfMalicious(obj){
     if(typeof str !== 'string'){
         return false; 
     }
-    const lower = str.toLowerCase()
-    if(lower.includes('script') || lower.includes('$ne') || lower.includes('$where')){
-        return true
+    const lower = str.toLowerCase();
+        const scriptTagRegex = /<\s*script\b/i;
+      if (
+        scriptTagRegex.test(lower) ||
+        lower.includes('$ne') ||
+        lower.includes('$where')
+    ) {
+        return true;
     }
+
     return false
 }
 

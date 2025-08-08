@@ -22,7 +22,7 @@ const auth = async (req, res, next) => {
 
         req.user = { id, email, role };
 
-        console.log(req.user)
+     
 
         next();
     } catch (error) {

@@ -4,16 +4,12 @@ const sendNotification = require("../helpers/Notification");
 const Notes = require("../models/Notes");
 const Project = require("../models/Project");
 const ActivityLogs = require("../models/ActivityLogs");
-
-
+const logActivity = require('../helpers/logActivity.helper');
 
 class TasksController {
       async getAllTaskes(req, res) {
             try {
-                  // const {status , dueDate ,projectId ,assignedTo } = req.query;
-
-                  //if (status && dueDate && projectId && assignedTo){
-                  //tasks = await Task.find({ شي للفلترة  }).populate("projectId").populate("assignedTo") ; }
+      
 
                   const tasks = await Task.find()
                         .populate({
@@ -59,7 +55,8 @@ class TasksController {
                         projectId,
                         assignedTo
                   });
-
+                  // Log activity
+                  await logActivity('CREATE_TASK',req.user.id,'Task',task._id);
                   // send Notifcation
                   const io = req.app.get("io");
                   const userSockets = req.app.get("userSockets");
@@ -100,7 +97,8 @@ class TasksController {
                         { $set: updates },
                         { new: true }
                   );
-
+                  // Log activity
+                  await logActivity('UPDATE_TASK',req.user.id,'Task',taskId);
                   // sendNotification to manger
                   const editingUserName = req.user.name;
                   const project = await Project.findById(updatedTask.projectId).populate("manager");
@@ -202,6 +200,46 @@ class TasksController {
                   throw new Error(error.message);
             }
       }
+
+      //Bringing tasks according to the status,projcet,the delivery Time , member(only manager)
+      async filterTasks (req,res){
+          try{
+            const {status,project,assignedTo,deliveryDate} = req.query;
+            const page = parseInt(req.query.page) ||1;
+            
+
+            
+            let filter = Object.fromEntries(
+                  Object.entries({
+                        projectId:project,
+                        status:status,
+                        assignedTo,
+                       
+            }).filter(([_,value])=>Boolean(value))
+      );
+            if(deliveryDate){
+                  filter.dueDate = {...({$lte:new Date(deliveryDate)})}
+            }
+            console.log(filter);
+            
+
+            const tasks = await Task.paginate({filter:filter,populatePath:'projectId assignedTo',populateSel:'name email role name',page:page})
+
+            
+            return res.status(200).json({
+                  status:"success",
+                  message:" tasks have been brought successfully",
+                  tasks:tasks
+            })
+      }catch(error){
+      
+          throw new Error(error.message);
+      }
+
+}
+
+
+
 
 
 }

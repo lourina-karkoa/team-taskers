@@ -6,8 +6,23 @@ const validateNote = [
     .isString().withMessage("content must be text")
     .trim()
     .notEmpty().withMessage("Note must not be empty"),
+
+    body('importNote')
+    .isBoolean().withMessage("importNote must be TRUE or FALSE")
+    .notEmpty().withMessage("importNote must not be empty ,enter:{TRUE or FALSE}"),
      validate
 ];
 
-module.exports =  validateNote
+
+const validateUpdateNote = [
+    body('content')
+    .isString().withMessage("content must be text")
+    .trim()
+    .notEmpty().withMessage("Note must not be empty"),
+     validate
+];
+module.exports =  {
+    validateNote,
+    validateUpdateNote
+}
 
