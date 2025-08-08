@@ -30,6 +30,7 @@ function deepSanitize(obj) {
 }
 
 function rejectIfMalicious(obj){
+
     if(!obj || typeof obj !== 'object'){
         return false;
     }
@@ -38,7 +39,7 @@ function rejectIfMalicious(obj){
         return false; 
     }
     const lower = str.toLowerCase();
-        const scriptTagRegex = /<\s*script\b/i;
+        const scriptTagRegex = /<\s*script.*?>.*?<\s*\/\s*script\s*>/i;
       if (
         scriptTagRegex.test(lower) ||
         lower.includes('$ne') ||
@@ -48,6 +49,7 @@ function rejectIfMalicious(obj){
     }
 
     return false
+
 }
 
 function cleanInput(req, res, next) {

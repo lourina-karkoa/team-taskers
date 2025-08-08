@@ -1,9 +1,4 @@
-
 const users = require("../models/Users")
-const Task = require("../models/Task")
-const Notes = require("../models/Notes")
-const Projects = require("../models/Project")
-const ActivityLogs = require("../models/ActivityLogs")
 const { hash } = require("../helpers/argon2.helper");
 const OTP = require("../models/OTP");
 const sendEmail = require("../config/email");
@@ -12,19 +7,20 @@ const generateOTP = require("../helpers/generateOTP")
 
 
 class UsersControllor {
+        // getAll User
     async getAll(req, res) {
         try {
             const TeamMember = await users.paginate({ filter: { role: "TeamMember" } })
 
-            return res.status(200).json({ state: "success", message: "AllMembers", TeamMember: TeamMember })
+            return res.status(200).json({ state: "success", message: "AllMembers", data: TeamMember })
         } catch (error) {
             throw new Error(error.message);
         }
     }
-
+    // edit info User
     async updateProfile(req, res) {
         try {
-            let { name, email } = req.body;
+            let { name } = req.body;
 
             const id = req.user.id;
 
@@ -40,10 +36,9 @@ class UsersControllor {
             }
 
             name = name || userExist.name;
-            email = email || userExist.email;
             image = image || userExist.image
 
-            const data = await users.findByIdAndUpdate(id, { name, email, image }, { new: true }).select("-password")
+            const data = await users.findByIdAndUpdate(id, { name, image }, { new: true }).select("-password")
 
             return res.status(200).json({ state: "success", message: "we update your profile data", data })
         } catch (error) {
@@ -51,6 +46,7 @@ class UsersControllor {
         }
     }
 
+    // sendOTP 
     async sendOTP(req, res) {
         try {
             const { email } = req.body;
@@ -71,7 +67,7 @@ class UsersControllor {
         }
     }
 
-
+    // checkOTP 
     async checkOTP(req, res) {
         try {
             const { otp, email } = req.body;
@@ -88,12 +84,13 @@ class UsersControllor {
                 return res.status(400).json({ state: "failed", message: "Invalid OTP", data: null });
             }
 
-            return res.status(200).json({ state: "success", message: "Done", secret: otpUser.secretKey });
+            return res.status(200).json({ state: "success", message: "OTP verified successfully.", secret: otpUser.secretKey });
         } catch (error) {
             throw new Error(error.message);
         }
     }
 
+    // updatePassword
     async updatePassword(req, res) {
         try {
             const { password, email, secret } = req.body;
@@ -123,58 +120,6 @@ class UsersControllor {
         }
     }
 
-    // we dont need it 
-    // deleteUser = async (req, res) => {
-    //     try {
-    //         const id = req.params.id
-
-    //         const userExist = await users.findById(id);
-
-    //         if (!userExist) {
-    //             return res.status(400).json({
-    //                 state: "failed",
-    //                 message: "this user is not valied",
-    //                 data: null,
-    //             });
-    //         }
-
-    //         await Task.deleteMany({ assignedTo: id });
-    //         await Notes.deleteMany({ user: id });
-    //         await Projects.updateMany(
-    //             { teamMembers: id },
-    //             { $pull: { teamMembers: id } }
-    //         );
-    //         await ActivityLogs.deleteMany({ user: id });
-    //         await users.findByIdAndDelete(id);
-    //         return res.status(200).json({
-    //             state: "success",
-    //             message: "delete user is successfully",
-    //             data: {},
-    //         });
-    //     } catch (error) {
-    //         throw new Error(error.message);
-    //     }
-    // };
-    // deleteAllUser = async (req, res) => {
-    //     try {
-
-    //         await Projects.updateMany(
-    //             {},
-    //             { $set: { teamMembers: [] } }
-    //         );
-    //         await Task.deleteMany({});
-    //         await Notes.deleteMany({ role: { $ne: 'Manager' } });
-    //         await ActivityLogs.deleteMany({ role: { $ne: 'Manager' } });
-    //         await users.deleteMany({ role: { $ne: 'Manager' } });
-    //         return res.status(200).json({
-    //             state: "success",
-    //             message: "delete All Users(TeamMember) is Done",
-    //             data: {},
-    //         });
-    //     } catch (error) {
-    //         throw new Error(error.message);
-    //     }
-    // };
 }
 module.exports = new UsersControllor();
 

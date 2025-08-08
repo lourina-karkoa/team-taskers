@@ -1,14 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../config/multer");
-
-
-const auth = require("../middlewares/auth.middleware");
-const role = require("../middlewares/role.middleware");
-
-// controller
-const usersController = require("../controllers/users.controller");
-const { updateProfileValidate, deleteUserValidate, updatePasswordValidate, checkOTPValidate ,otpValidate} = require("../validation/users.validate");
+const upload = require("../config/multer"); // handle file uploads
+const auth = require("../middlewares/auth.middleware"); // verifyToken
+const role = require("../middlewares/role.middleware"); // verify-role
+const usersController = require("../controllers/users.controller"); // controller
+// validation
+const { updateProfileValidate, updatePasswordValidate, checkOTPValidate ,otpValidate} = require("../validation/users.validate");
 // const checkImage = require("../middlewares/checkImage");
 
 // routes
@@ -25,11 +22,5 @@ router.post("/check-otp",[...checkOTPValidate], usersController.checkOTP)
 router.put("/update", [auth, upload.single("image") ,...updateProfileValidate], usersController.updateProfile);
 
 router.put("/update-password", [...updatePasswordValidate], usersController.updatePassword);
-
-// Delete
-// router.delete("/:id", [auth, role(["Manager"])], [...deleteUserValidate], usersController.deleteUser);
-
-// router.delete("/", [auth, role(["Manager"])], usersController.deleteAllUser);
-
 
 module.exports = router

@@ -7,7 +7,9 @@ const ActivityLogs = require("../models/ActivityLogs");
 const logActivity = require('../helpers/logActivity.helper');
 
 
+
 class TasksController {
+          // get All Taskes
       async getAllTaskes(req, res) {
             try {
       
@@ -18,12 +20,14 @@ class TasksController {
                               select: "title description _id"
                         })
                         .populate("assignedTo", "name email role image");
-                  return res.status(200).json({ state: "success", message: "All tasks", Alltasks: tasks });
+                  return res.status(200).json({ state: "success", message: "All tasks", data: tasks });
 
             } catch (error) {
                   throw new Error(error.message);
             }
       };
+      
+      // get Taske by id
       async getTaskById(req, res) {
             try {
 
@@ -31,7 +35,7 @@ class TasksController {
 
                   const task = await Task.findById(id).select(req.user.role === "TeamMember" ? "-projectId" : "");
 
-                  return res.status(200).json({ state: "success", message: "Specific tasks", task: task });
+                  return res.status(200).json({ state: "success", message: "Specific tasks", data: task });
 
             } catch (error) {
                   throw new Error(error.message);
@@ -65,11 +69,11 @@ class TasksController {
                   await sendNotification(io, userSockets, {
                         userId: assignedTo,
                         type: "new_task",
-                        message: `New task assigned ${title}`,
+                        message: `New task assigned to ypu titled : ${title}`,
                         relatedId: task._id
                   });
 
-                  return res.status(200).json({ state: "success", message: "Added task successfully", task });
+                  return res.status(200).json({ state: "success", message: "Added task successfully", data: task });
 
             } catch (error) {
                   throw new Error(error.message);
@@ -77,6 +81,7 @@ class TasksController {
 
       };
 
+      // edit status || edit Task data
       async updateTask(req, res) {
             try {
                   const taskId = req.params.id;
@@ -102,17 +107,17 @@ class TasksController {
                   await logActivity('UPDATE_TASK',req.user.id,'Task',taskId);
                   // sendNotification to manger
                   const editingUserName = req.user.name;
-                  const project = await Project.findById(updatedTask.projectId).populate("manager");
-                  const managerId = project?.manager?._id;
+                  const project = await Project.findById(updatedTask.projectId).populate("createdBy");
+                  console.log("Manager ID:", project?.createdBy?._id);
+                  const managerId = project?.createdBy._id.toString();
 
                   if (managerId) {
                         const io = req.app.get("io");
                         const userSockets = req.app.get("userSockets");
-
                         await sendNotification(io, userSockets, {
                               userId: managerId,
                               type: "task_updated",
-                              message: `Task "${updatedTask.title}" was updated by ${editingUserName}`,
+                              message: `"${updatedTask.title}" was updated by ${editingUserName} to ${updates.status}`,
                               relatedId: updatedTask._id
                         });
                   }
@@ -128,7 +133,7 @@ class TasksController {
             }
       }
 
-
+      // delete Task
       async deleteTask(req, res) {
             try {
                   const id = req.params.id; // Task ID
@@ -161,6 +166,7 @@ class TasksController {
             }
       }
 
+      // deleta All task
       async deleteAllTasks(req, res) {
             try {
                   const taskIds = await Task.find().distinct("_id");

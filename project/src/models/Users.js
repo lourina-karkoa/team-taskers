@@ -1,4 +1,5 @@
 const { default: mongoose } = require("mongoose");
+// schema Users
 
 const paginate = require("../plugins/paginate");
 
@@ -24,23 +25,25 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 });
 
+
 userSchema.pre('save', function(next) {
 
     if (!this.image && this.name) {
 
         const firstLetter = this.name.charAt(0).toUpperCase();
         
-        this.image = `https://via.placeholder.com/150/CCCCCC/FFFFFF?text=${firstLetter}`;
+        this.image = `https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2264922221.jpg`;
 
     }
     next(); 
 });
 
+// paginate 
 userSchema.plugin(paginate)
 
 const Users = mongoose.model("Users", userSchema)
 
-
+// creat admin
 const email = process.env.ADMIN_EMAIL;
 const password = process.env.ADMIN_PASSWORD;
 
