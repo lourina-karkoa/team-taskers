@@ -65,17 +65,16 @@ app.use("/api/export",ExportPdfRouters);
 //Notes APIS
 app.use('/api/notes',NotesRouters)
 
-
-//app.use(notFound)
-app.use(errorHandler);
-
-
-
 // auth
 app.use('/api/auth' , routerAuth)
 
 // project
 app.use('/api/project' , routerProject)
+
+//app.use(notFound)
+app.use(errorHandler);
+
+
 
 
 

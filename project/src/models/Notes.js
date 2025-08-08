@@ -14,7 +14,8 @@ const Notes = mongoose.model("Notes", new mongoose.Schema({
     content: {
         type: String,
         required: true 
-    }
+    },
+    important : { type: Boolean, default: false }
 }, {
     timestamps: true
 }))

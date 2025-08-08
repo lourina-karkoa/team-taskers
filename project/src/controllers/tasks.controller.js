@@ -66,7 +66,7 @@ class TasksController {
                   await sendNotification(io, userSockets, {
                         userId: assignedTo,
                         type: "new_task",
-                        message: `New task assigned ${title}`,
+                        message: `New task assigned to ypu titled : ${title}`,
                         relatedId: task._id
                   });
 
@@ -102,17 +102,17 @@ class TasksController {
 
                   // sendNotification to manger
                   const editingUserName = req.user.name;
-                  const project = await Project.findById(updatedTask.projectId).populate("manager");
-                  const managerId = project?.manager?._id;
+                  const project = await Project.findById(updatedTask.projectId).populate("createdBy");
+                  console.log("Manager ID:", project?.createdBy?._id);
+                  const managerId = project?.createdBy._id.toString();
 
                   if (managerId) {
                         const io = req.app.get("io");
                         const userSockets = req.app.get("userSockets");
-
                         await sendNotification(io, userSockets, {
                               userId: managerId,
                               type: "task_updated",
-                              message: `Task "${updatedTask.title}" was updated by ${editingUserName}`,
+                              message: `"${updatedTask.title}" was updated by ${editingUserName} to ${updates.status}`,
                               relatedId: updatedTask._id
                         });
                   }
