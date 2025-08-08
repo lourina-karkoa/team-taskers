@@ -30,18 +30,16 @@ function deepSanitize(obj) {
 }
 
 function rejectIfMalicious(obj){
-    if(!obj || typeof obj !== 'object'){
-        return false;
-    }
-    const str = JSON.stringify(obj); 
-    if(typeof str !== 'string'){
-        return false; 
-    }
-    const lower = str.toLowerCase()
-    if(lower.includes('script') || lower.includes('$ne') || lower.includes('$where')){
-        return true
-    }
-    return false
+    if (!obj || typeof obj !== 'object') return false;
+
+    const str = JSON.stringify(obj).toLowerCase();
+
+    const dangerousScript = /<\s*script.*?>.*?<\s*\/\s*script\s*>/i;
+
+    if (dangerousScript.test(str)) return true;
+    if (str.includes('$ne') || str.includes('$where')) return true;
+
+    return false;
 }
 
 function cleanInput(req, res, next) {

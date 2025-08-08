@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const auth = async (req, res, next) => {
     const { authorization } = req.headers;
 
-    if(!authorization) {
+    if (!authorization) {
         return res.status(401).json({ message: "Authorization must be required" })
     }
 
@@ -16,11 +16,16 @@ const auth = async (req, res, next) => {
 
         const isExist = await User.findById(id);
 
-        if(!isExist) {
+        if (!isExist) {
             return res.status(401).json({ message: "Invalid Authorization" })
         }
 
-        req.user = { id, email, role };
+        req.user = {
+            id ,
+            name: isExist.name,
+            role,
+            email
+        };
 
         console.log(req.user)
 

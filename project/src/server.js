@@ -13,38 +13,33 @@ const connectedUsers = new Map(); // userId => socket.id
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
+  // When a user registers their socket, store their ID and send unread notifications
+  socket.on("register", async (payload) => {
+  const userId = payload?.data || payload;
+  connectedUsers.set(userId.toString(), socket.id);
+  console.log(`Registered user ${userId} with socket ${socket.id}`);
 
+  try {
+    const unread = await Notification.find({ userId, read: false });
 
-  socket.on("register", async (userId) => {
-    connectedUsers.set(userId, socket.id);
-    console.log(`Registered user ${userId} with socket ${socket.id}`);
-
-    try {
-    
-      const unread = await Notification.find({ userId, read: false });
-      unread.forEach((n) => {
-        io.to(socket.id).emit("notification", {
-          type: n.type,
-          message: n.message,
-          relatedId: n.relatedId,
-        });
+    for (const n of unread) {
+      // sent notification
+      io.to(socket.id).emit("notification", {
+        type: n.type,
+        message: n.message,
+        relatedId: n.relatedId,
+        id: n._id, 
       });
-    } catch (err) {
-      console.error("Error fetching unread notifications:", err);
+
+      await Notification.findByIdAndUpdate(n._id, { read: true });
     }
-  });
 
-
-  socket.on("markAsRead", async (notificationId) => {
-    try {
-      await Notification.findByIdAndUpdate(notificationId, { read: true });
-      console.log(`Notification ${notificationId} marked as read`);
-    } catch (err) {
-      console.error("Error marking notification as read:", err);
-    }
-  });
-
-
+    console.log(`Sent ${unread.length} notifications and marked them as read`);
+  } catch (err) {
+    console.error("Error fetching unread notifications:", err);
+  }
+});
+  // Remove user from map on disconnect
   socket.on("disconnect", () => {
     for (const [userId, socketId] of connectedUsers.entries()) {
       if (socketId === socket.id) {
@@ -56,9 +51,9 @@ io.on("connection", (socket) => {
   });
 });
 
+
 app.set("io", io);
 app.set("userSockets", connectedUsers);
-
 const PORT = process.env.PORT;
 
 mongoose

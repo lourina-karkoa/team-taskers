@@ -19,7 +19,6 @@ router.get("/:id",[auth, role(["TeamMember","Manager"])] , projectController.get
 ////add new project
 router.post( "/add" ,[auth, role(["Manager"])], validateProject, projectController.addProject);
 
-
 //////update project by id
 router.put("/update/:id", [auth ,role (["Manager"])], validateProject,projectController.updateProject)
 

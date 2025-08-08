@@ -1,48 +1,19 @@
-const { body, param, query } = require('express-validator');
+const { body } = require('express-validator');
 const Users = require("../models/Users");
 const validate = require("../middlewares/validate.middleware");
-const mongoose = require("mongoose");
 
+// Validate profile update - only 'name' can be updated and must be a string
 const updateProfileValidate = [
-  body("name")
+  // Validate that name is a string
+   body("name")
+    .optional()
     .isString().withMessage("Name must be string"),
-
-  body("email")
-    .isString().withMessage("Email must be string")
-    .isEmail().withMessage("Invalid Email")
-    .custom(async (value, { req }) => {
-      const existingUser = await Users.findOne({ email: value });
-
-      // ✅ طريقة أخرى صحيحة:
-      if (existingUser && !existingUser._id.equals(req.user._id))
-
-        return true;
-    }),
-
-
   validate
 ]
 
-const deleteUserValidate = [
-  param("id")
-    .custom((value) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
-        throw new Error("Invalid user ID");
-      }
-      return true;
-    })
-    .bail()
-    .custom(async (value) => {
-      const user = await Users.findById(value);
-      if (!user) {
-        throw new Error("User not found");
-      }
-      return true;
-    }),
-
-  validate,
-];
+// Validate email before sending OTP
 const otpValidate = [
+  
   body("email")
     .isString().withMessage("Email must be string")
     .isEmail().withMessage("Invalid Email")
@@ -59,6 +30,7 @@ const otpValidate = [
   validate,
 ];
 
+// Validate OTP check request
 const checkOTPValidate = [
   body("email")
     .isString().withMessage("Email must be string")
@@ -81,6 +53,7 @@ const checkOTPValidate = [
   validate,
 ];
 
+// Validate password update request
 const updatePasswordValidate = [
   body("email")
     .isString().withMessage("Email must be string")
@@ -104,11 +77,8 @@ const updatePasswordValidate = [
   validate
 ]
 
-
-
 module.exports = {
   updateProfileValidate,
-  deleteUserValidate,
   otpValidate,
   checkOTPValidate,
   updatePasswordValidate

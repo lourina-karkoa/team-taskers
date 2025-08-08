@@ -1,4 +1,5 @@
 const { default: mongoose } = require("mongoose");
+// schema Users
 
 const paginate = require("../plugins/paginate");
 
@@ -24,6 +25,7 @@ const userSchema = new mongoose.Schema({
     timestamps: true
 });
 
+
 userSchema.pre('save', function(next) {
 
     if (!this.image && this.name) {
@@ -36,11 +38,12 @@ userSchema.pre('save', function(next) {
     next(); 
 });
 
+// paginate 
 userSchema.plugin(paginate)
 
 const Users = mongoose.model("Users", userSchema)
 
-
+// creat admin
 const email = process.env.ADMIN_EMAIL;
 const password = process.env.ADMIN_PASSWORD;
 
