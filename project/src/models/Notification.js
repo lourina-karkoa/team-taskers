@@ -1,5 +1,5 @@
 const { default: mongoose } = require("mongoose");
-
+// schema notification
 const notificationSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,

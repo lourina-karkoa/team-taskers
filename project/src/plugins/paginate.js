@@ -1,8 +1,9 @@
+// Add pagination to the schema
 module.exports = function paginate(schema) {
 
     schema.statics.paginate = async function({ filter = {},select =[], populate, page = 1, limit = 5, sort = '-createdAt' }) {
         const skip = (page - 1) * limit;
-
+        // Get data with optional populate and select
         const data = 
             populate 
             ? await this.find(filter).skip(skip).limit(limit).sort(sort).select([...select]).populate(populate, "-password -__v")
