@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const auth = require ("../middlewares/auth.middleware");
-const role = require ("../middlewares/role.middleware")
-const TasksController = require("../controllers/tasks.controller");
+const auth = require ("../middlewares/auth.middleware"); // verifyToken
+const role = require ("../middlewares/role.middleware"); // verify-role
+const TasksController = require("../controllers/tasks.controller"); // controller
+// validation
 const { getTaskByIdValidate,createTaskValidate, updateTaskValidate , deleteTaskValidate } = require("../validation/tasks.validate")
 
 
@@ -17,13 +18,13 @@ router.post("/add", [auth, role(["Manager"]),...createTaskValidate],TasksControl
 
 
 // Put
-router.put("/:id", [auth, role(["Manager", "TeamMember"]), ...updateTaskValidate], TasksController.updateTask);
+router.put("/update/:id", [auth, role(["Manager", "TeamMember"]), ...updateTaskValidate], TasksController.updateTask);
 
 
 // Delete
-router.delete("/:id", [auth, role(["Manager"]),...deleteTaskValidate], TasksController.deleteTask);
+router.delete("/delete/:id", [auth, role(["Manager"]),...deleteTaskValidate], TasksController.deleteTask);
 
-router.delete("/", [auth, role(["Manager"])], TasksController.deleteAllTasks);
+router.delete("/deleteAll", [auth, role(["Manager"])], TasksController.deleteAllTasks);
 
 
 module.exports = router;

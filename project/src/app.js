@@ -1,43 +1,26 @@
 const express = require("express");
-
-//////helmet
+//helmet
 const applyHelmet = require('./../src/middlewares/helmet.middleware');
-///rate-time
+//rate-time
 const generalLimiter = require('./../src/middlewares/ratelimit.middleware');
-
-
-const app = express();
-///import auth
-const routerAuth = require("./routes/auth.routes")
-///import project
-//project
-const routerProject = require("./routes/projects.routes")
-
-// import
-const logger = require("morgan");
-const cors = require("cors");
-
-
-
-const errorHandler = require("./middlewares/errorhandler.middleware");
-const cleanInput = require('./middlewares/security.middleware');
-
-// const notFound = require("./middlewares/notFound.middleware");
-
-
-const path = require("path")
+const routerAuth = require("./routes/auth.routes") //import auth
+const routerProject = require("./routes/projects.routes")//project
+const path = require("path");
 const tasksPath = require("./routes/tasks.routes");
 const ActivitiesLogRouters = require('./routes/ActivityLogs.routes');
 const ExportPdfRouters = require('./routes/exportPDF.routes');
 const NotesRouters = require('./routes/notes.routes');
+const errorHandler = require("./middlewares/errorhandler.middleware");
+const cleanInput = require('./middlewares/security.middleware');
+const logger = require("morgan");
+const cors = require("cors");
 
+const app = express();
 
-/////helmet
+//helmet
 app.use(applyHelmet);
-
-///rate-time
+//rate-time
 app.use(generalLimiter);
-
 
 // middlewares
 app.use(logger("dev"));
@@ -54,26 +37,24 @@ app.use(cleanInput);
 
 // routers
 
-app.use("/api/users", require("./routes/users.routes"));
+app.use('/api/auth' , routerAuth); // auth APIs 
 
-// app.use();
-app.use("/api/tasks",tasksPath);
-// Activity-logs APIs
-app.use("/api/activity-logs",ActivitiesLogRouters);
-//Export-PDF APIS
-app.use("/api/export",ExportPdfRouters);
-//Notes APIS
-app.use('/api/notes',NotesRouters)
+app.use("/api/users", require("./routes/users.routes")); // User APIs
 
-// auth
-app.use('/api/auth' , routerAuth)
+app.use("/api/tasks",tasksPath); // Task APIs
 
-// project
-app.use('/api/project' , routerProject)
+app.use("/api/activity-logs",ActivitiesLogRouters);// Activity-logs APIs
+
+app.use("/api/export",ExportPdfRouters); //Export-PDF APIS
+
+app.use('/api/notes',NotesRouters); //Notes APIS
+
+app.use('/api/project' , routerProject); // project APIS
+
 
 //app.use(notFound)
 app.use(errorHandler);
-
+// const notFound = require("./middlewares/notFound.middleware");
 
 
 

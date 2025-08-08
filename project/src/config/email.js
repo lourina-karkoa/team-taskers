@@ -1,5 +1,6 @@
 const nodemailer = require("nodemailer");
 const PASS = process.env.PASS;
+// Create a transporter object using Gmail as the email service
 const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -16,7 +17,7 @@ async function sendEmail(to, otp) {
             subject: "Password Reset OTP",
             text: `Please enter the OTP: ${otp}`
         };
-
+    // Send the email using the transporter
         await transporter.sendMail(opts)
     } catch (error) {
         console.error(error.message)

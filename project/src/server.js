@@ -13,7 +13,7 @@ const connectedUsers = new Map(); // userId => socket.id
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
-
+  // When a user registers their socket, store their ID and send unread notifications
   socket.on("register", async (payload) => {
   const userId = payload?.data || payload;
   connectedUsers.set(userId.toString(), socket.id);
@@ -39,7 +39,7 @@ io.on("connection", (socket) => {
     console.error("Error fetching unread notifications:", err);
   }
 });
-
+  // Remove user from map on disconnect
   socket.on("disconnect", () => {
     for (const [userId, socketId] of connectedUsers.entries()) {
       if (socketId === socket.id) {
@@ -54,7 +54,6 @@ io.on("connection", (socket) => {
 
 app.set("io", io);
 app.set("userSockets", connectedUsers);
-
 const PORT = process.env.PORT;
 
 mongoose
