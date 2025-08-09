@@ -27,6 +27,8 @@ const auth = async (req, res, next) => {
             email
         };
 
+
+    
      
 
         next();

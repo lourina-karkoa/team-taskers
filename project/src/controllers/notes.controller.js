@@ -7,31 +7,28 @@ const sendNotification = require('../helpers/Notification');
 
 class Note {
 
-
     // add note to a task
     addNote = async (req, res) => {
         try {
             const taskId = req.params.taskId;
-
+            
             const {content , important} = req.body;
 
             const isExist = await Task.findById(taskId);
             if (!isExist) {
-                return res.status(404).json({ message: "Task not found !" })
+                return res.status(404).json({status:"faild",message: "Task not found !" })
             }
 
             const note = new Notes({
                 task: taskId,
                 author: req.user.id,
                 content,
-                important: important || false
+                important:important || false
             });
 
             await note.save();
             //Activit-logs
-
             await logActivity('ADD_NOTE',note.author,'Notes',note._id);
-
 
             // sendNotification to manger
             if (note.important) {
@@ -142,7 +139,7 @@ class Note {
             if(importNote){
                 filter ={
                     task:taskId,
-                    importNote:importNote
+                    important:importNote
                 }
             }
             else{

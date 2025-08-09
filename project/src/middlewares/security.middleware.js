@@ -60,6 +60,7 @@ function cleanInput(req, res, next) {
     }
 
   req.body = deepSanitize(req.body);
+  
   req.query = deepSanitize(req.query);
   req.params = deepSanitize(req.params);
   

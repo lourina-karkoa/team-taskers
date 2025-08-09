@@ -18,7 +18,7 @@ class UsersControllor {
         }
     }
     // edit info User
-    async updateProfile(req, res) {
+async updateProfile(req, res) {
         try {
             let { name } = req.body;
 

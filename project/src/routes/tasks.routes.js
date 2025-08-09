@@ -19,11 +19,11 @@ router.get("/:id", [auth, role(["TeamMember","Manager"]), ...getTaskByIdValidate
 
 
 // Post
-router.post("/add", [auth, role(["Manager"]),...createTaskValidate],TasksController.createTask );
+// router.post("/add", [auth, role(["Manager"]),...createTaskValidate],TasksController.createTask );
 
 
-// Put
-router.put("/update/:id", [auth, role(["Manager", "TeamMember"]), ...updateTaskValidate], TasksController.updateTask);
+// // Put
+// router.put("/update-Status/:id", [auth, role(["Manager", "TeamMember"]), ...updateTaskValidate], TasksController.updateStatus);
 
 
 // Delete

@@ -9,7 +9,7 @@ module.exports = function paginate(schema) {
         const data = 
              populatePath && populateSel 
              ? await this.find(filter).skip(skip).limit(limit).sort(sort).select(baseSelect).populate(populatePath,populateSel)
-             : await this.find(filter).skip(skip).limit(limit).sort(sort).select(["-__v -password",baseSelect]);
+             : await this.find(filter).skip(skip).limit(limit).sort(sort).select(["-password",baseSelect]);
             
 
         const total = await this.countDocuments(filter);
