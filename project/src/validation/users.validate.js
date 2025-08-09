@@ -8,6 +8,8 @@ const updateProfileValidate = [
    body("name")
     .optional()
     .isString().withMessage("Name must be string"),
+  
+
   validate
 ]
 

@@ -9,16 +9,17 @@ class ExportPDF {
     exportProject = async (req, res) => {
         try {
             const projectId = req.params.projectId;
-            const project = await Projects.findById(projectId).populate({ path: 'manager', select: ['name', 'email'] });
+            const project = await Projects.findById(projectId).populate('createdBy','name email' );
+            
             if (!project) {
-                return res.status(404).json({ message: "Project not fount" })
+                return res.status(404).json({ status:"faild",message: "Project not fount" })
             }
             const tasks = await Task.find({ projectId: project._id }).populate({ path: 'assignedTo', select: ['name'] });
             const today = new Date().toLocaleDateString('EG');
             const docDefinition = {
                 content: [
                     {
-                        text: `Task Report for Project:${project.title}`,
+                        text: `Task Report for Project:${project.name}`,
                         style: 'header',
                         alignment: 'center'
                     },
@@ -26,11 +27,11 @@ class ExportPDF {
                         text: `Date:${today}`,
                         alignment: 'left'
                     }, {
-                        text: `Manager:${project.manager?.name}`,
+                        text: `Manager:${project.createdBy?.name}`,
                         alignment: 'right'
 
                     }, {
-                        text: `Email-Manager:${project.manager?.email}`,
+                        text: `Email-Manager:${project.createdBy?.email}`,
                         alignment: 'right',
 
 
@@ -43,23 +44,29 @@ class ExportPDF {
                     {
                         table: {
                             headerRows: 1,
-                            widths: ['*', '*', '*', '*', '*', '*'],
+                            widths: ['*', '*', '*', '*', '*', '*', '*'],
                             body: [
                                 [
-                                    { text: 'Title', style: 'tableHeader' },
+                                    { text: 'Title Task', style: 'tableHeader' },
                                     { text: 'Description', style: 'tableHeader' },
                                     { text: 'Assigned To', style: 'tableHeader' },
-                                    { text: 'Status', style: 'tableHeader' },
+                                    { text: 'Start Date', style: 'tableHeader' },
+                                    { text: 'Due Date', style: 'tableHeader' },
                                     { text: 'Priority', style: 'tableHeader' },
-                                    { text: 'Due Date', style: 'tableHeader' }
+                                    { text: 'Status', style: 'tableHeader' },
+
+
                                 ],
                                 ...tasks.map(task => [
                                     task.title,
                                     task.description,
                                     task.assignedTo?.name,
-                                    task.status,
+                                    new Date(task.startDate).toLocaleDateString(),
+                                    new Date(task.dueDate).toLocaleDateString(),
                                     task.priority,
-                                    new Date(task.dueDate).toLocaleDateString()
+                                    task.status,
+
+
                                 ])
                             ]
                         },
@@ -119,7 +126,7 @@ class ExportPDF {
 
         } catch (error) {
             console.error('Error exporting project tasks PDF:', error);
-            res.status(500).json({ error: 'Failed to generate report' });
+            res.status(500).json({status:"faild", message: 'Failed to generate report' });
         }
 
 
@@ -127,8 +134,11 @@ class ExportPDF {
     //export projects Report to pdf(manager only)
     exportAllProject = async (req, res) => {
         try {
-            const project = await Projects.findOne({manager:req.user.id}).populate({ path: 'manager', select: ['name', 'email'] });;
-            const projects = await Projects.find().populate({ path: 'manager', select: ['name', 'email'] });
+            const project = await Projects.findOne({createdBy:req.user.id}).populate({ path: 'createdBy', select: ['name', 'email'] });
+            if(!project){
+                return res.status(404).json({ status:"faild",message: "Projects not fount" })
+            }
+            const projects = await Projects.find().populate({ path: 'createdBy', select: ['name', 'email'] });
             const today = new Date().toLocaleDateString('EG');
             const docDefinition = {
                 content: [
@@ -137,31 +147,31 @@ class ExportPDF {
                         text: `Date:${today}`,
                         alignment: 'left'
                     }, {
-                        text: `Manager:${project.manager?.name}`,
+                        text: `Manager:${project.createdBy?.name}`,
                         alignment: 'right'
 
                     }, {
-                        text: `Email-Manager:${project.manager?.email}`,
+                        text: `Email-Manager:${project.createdBy?.email}`,
                         alignment: 'right',
                     }],
                     {
                         table: {
                             headerRows: 1,
-                            widths: ['*', '*', '*', '*', '*'],
+                            widths: ['*', '*', '*', '*'],
                             body: [
                                 [
                                     { text: 'Title Project', style: 'tableHeader' },
+                                    { text: 'Created By', style: 'tableHeader' },
                                     { text: 'Start Date', style: 'tableHeader' },
                                     { text: 'End Date', style: 'tableHeader' },
-                                    { text: 'Created By', style: 'tableHeader' },
-                                    { text: 'status', style: 'tableHeader' },
+
                                 ],
                                 ...projects.map(project => [
-                                    project.title,
+                                    project.name,
+                                    project.createdBy?.name || 'N/A',
                                     new Date(project.startDate).toLocaleDateString(),
                                     new Date(project.endDate).toLocaleDateString(),
-                                    project.manager?.name || 'N/A',
-                                    project.status,
+
                                 ])
                             ]
                         },
@@ -202,13 +212,14 @@ class ExportPDF {
             };
 
             const pdfDoc = generatePdf(docDefinition);
+            
             res.setHeader('Content-Type', 'application/pdf');
-            res.setHeader('Content-Disposition', 'attachment; filename="projects_report.pdf"');
+            res.setHeader('Content-Disposition', 'inline; filename="projects_report.pdf"');
             pdfDoc.pipe(res);
             pdfDoc.end();
         } catch (error) {
             console.error('PDF Project Export Error:', error);
-            res.status(500).json({ error: 'Failed to export project PDF' });
+            res.status(500).json({ status:"faild",message: 'Failed to export project PDF' });
         }
     }
 }

@@ -1,29 +1,31 @@
 // Add pagination to the schema
 module.exports = function paginate(schema) {
 
-    schema.statics.paginate = async function({ filter = {},select =[], populate, page = 1, limit = 5, sort = '-createdAt' }) {
+    schema.statics.paginate = async function ({ filter = {}, select, populatePath,populateSel, page = 1, limit = 5, sort = '-createdAt' }) {
         const skip = (page - 1) * limit;
-        // Get data with optional populate and select
+           let baseSelect = Array.isArray(select) ? select.join(' ') : (select || '').trim();
+           
+        
         const data = 
-            populate 
-            ? await this.find(filter).skip(skip).limit(limit).sort(sort).select([...select]).populate(populate, "-password -__v")
-            : await this.find(filter).skip(skip).limit(limit).sort(sort).select([...select]);
-
+             populatePath && populateSel 
+             ? await this.find(filter).skip(skip).limit(limit).sort(sort).select(baseSelect).populate(populatePath,populateSel)
+             : await this.find(filter).skip(skip).limit(limit).sort(sort).select(["-password",baseSelect]);
             
+
         const total = await this.countDocuments(filter);
         const pages = Math.ceil(total / limit);
         const hasNextPage = page < pages;
         const hasPrevPage = page > 1;
 
-        return { 
-            data, 
-            total, 
-            page, 
-            pages, 
+        return {
+            data,
+            total,
+            page,
+            pages,
             hasNextPage,
             hasPrevPage,
             nextPage: hasNextPage ? page + 1 : null,
-            prevPage: hasPrevPage ? page - 1 : null 
+            prevPage: hasPrevPage ? page - 1 : null
         };
     };
 };

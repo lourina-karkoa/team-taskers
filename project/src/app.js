@@ -13,7 +13,7 @@ const NotesRouters = require('./routes/notes.routes');
 const errorHandler = require("./middlewares/errorhandler.middleware");
 const cleanInput = require('./middlewares/security.middleware');
 const logger = require("morgan");
-const cors = require("cors");
+
 
 const app = express();
 
@@ -24,10 +24,7 @@ app.use(generalLimiter);
 
 // middlewares
 app.use(logger("dev"));
-app.use(cors({
-    origin: "*",
-    methods: ["GET", "POST"]
-}));
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public/uploads')));
 app.use(express.urlencoded({ extended: true }));

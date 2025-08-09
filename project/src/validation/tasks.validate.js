@@ -107,6 +107,7 @@ const createTaskValidate = [
 
   validate,
 ];
+
 // Validate task update input
 const updateTaskValidate = [
   param("id")
@@ -126,10 +127,8 @@ const updateTaskValidate = [
     }),
 
   body("status")
-    .if((value, { req }) => req.user.role === "TeamMember" || req.user.role === "Manager")
     .notEmpty()
     .withMessage("Status is required")
-    .bail()
     .isIn(["in_progress", "completed", "delayed"])
     .withMessage("Status must be one of: 'in_progress', 'completed', or 'delayed'."),
 
@@ -149,7 +148,8 @@ const updateTaskValidate = [
     .if((value, { req }) => req.user.role === "Manager")
     .optional()
     .isISO8601()
-    .withMessage("Start date must be a valid ISO 8601 date (e.g., 2025-08-08)."),
+    .withMessage("Start date must be a valid ISO 8601 date (e.g., 2025-08-08).")
+    ,
 
   body("dueDate")
     .if((value, { req }) => req.user.role === "Manager")
@@ -195,7 +195,6 @@ const deleteTaskValidate = [
 
 module.exports = {
   getTaskByIdValidate,
-  createTaskValidate,
   updateTaskValidate,
   deleteTaskValidate,
 };

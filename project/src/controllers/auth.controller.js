@@ -74,6 +74,7 @@ class UsersControllor {
         try {
             // Log activity
             await logActivity('USER_LOGOUT',req.user.id,'Users',req.user.id)
+
             return res.status(200).json({state: "success", message: "User logout sucessfully" });
         } catch (error) {
             throw new Error(error.message);

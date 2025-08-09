@@ -6,9 +6,6 @@ const { signupValidate, loginValidate } = require("./../validation/auth.validati
 const upload = require("../config/multer");
 
 
-
-
-
 ////signup
 router.post("/signup", upload.single("image"), [...signupValidate] , authController.signup);
 
