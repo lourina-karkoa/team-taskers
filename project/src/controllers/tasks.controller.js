@@ -6,7 +6,7 @@ const Project = require("../models/Project");
 const ActivityLogs = require("../models/ActivityLogs");
 
 class TasksController {
-          // get All Taskes
+      // get All Taskes
       async getAllTaskes(req, res) {
             try {
                   // const {status , dueDate ,projectId ,assignedTo } = req.query;
@@ -26,7 +26,7 @@ class TasksController {
                   throw new Error(error.message);
             }
       };
-      
+
       // get Taske by id
       async getTaskById(req, res) {
             try {
@@ -87,6 +87,17 @@ class TasksController {
                   let updates = req.body;
 
                   if (req.user.role === "TeamMember") {
+                        
+                        const task = await Task.findById(taskId);
+
+                        if (!task.assignedTo.equals(req.user._id)) {
+                              return res.status(403).json({
+                                    state: "error",
+                                    message: "You can only update tasks assigned to you",
+                                    data: null
+                              });
+                        }
+
                         if (!updates.status || Object.keys(updates).length > 1) {
                               return res.status(403).json({
                                     state: "error",
@@ -94,6 +105,7 @@ class TasksController {
                                     data: null
                               });
                         }
+
                         updates = { status: updates.status };
                   }
 
@@ -106,7 +118,6 @@ class TasksController {
                   // sendNotification to manger
                   const editingUserName = req.user.name;
                   const project = await Project.findById(updatedTask.projectId).populate("createdBy");
-                  console.log("Manager ID:", project?.createdBy?._id);
                   const managerId = project?.createdBy._id.toString();
 
                   if (managerId) {
@@ -130,6 +141,7 @@ class TasksController {
                   throw new Error(error.message);
             }
       }
+
 
       // delete Task
       async deleteTask(req, res) {
