@@ -9,7 +9,7 @@ const logActivity = require('../helpers/logActivity.helper');
 
 
 class TasksController {
-          // get All Taskes
+      // get All Taskes
       async getAllTaskes(req, res) {
             try {
       
@@ -26,7 +26,7 @@ class TasksController {
                   throw new Error(error.message);
             }
       };
-      
+
       // get Taske by id
       async getTaskById(req, res) {
             try {
@@ -80,6 +80,70 @@ class TasksController {
             }
 
       };
+
+
+      // edit status || edit Task data
+      async updateTask(req, res) {
+            try {
+                  const taskId = req.params.id;
+                  let updates = req.body;
+
+                  if (req.user.role === "TeamMember") {
+                        
+                        const task = await Task.findById(taskId);
+
+                        if (!task.assignedTo.equals(req.user._id)) {
+                              return res.status(403).json({
+                                    state: "error",
+                                    message: "You can only update tasks assigned to you",
+                                    data: null
+                              });
+                        }
+
+                        if (!updates.status || Object.keys(updates).length > 1) {
+                              return res.status(403).json({
+                                    state: "error",
+                                    message: "You can only update the task status",
+                                    data: null
+                              });
+                        }
+
+                        updates = { status: updates.status };
+                  }
+
+                  const updatedTask = await Task.findByIdAndUpdate(
+                        taskId,
+                        { $set: updates },
+                        { new: true }
+                  );
+
+                  // sendNotification to manger
+                  const editingUserName = req.user.name;
+                  const project = await Project.findById(updatedTask.projectId).populate("createdBy");
+                  const managerId = project?.createdBy._id.toString();
+
+                  if (managerId) {
+                        const io = req.app.get("io");
+                        const userSockets = req.app.get("userSockets");
+                        await sendNotification(io, userSockets, {
+                              userId: managerId,
+                              type: "task_updated",
+                              message: `"${updatedTask.title}" was updated by ${editingUserName} to ${updates.status}`,
+                              relatedId: updatedTask._id
+                        });
+                  }
+
+                  return res.status(200).json({
+                        state: "success",
+                        message: "Task updated successfully",
+                        data: updatedTask
+                  });
+
+            } catch (error) {
+                  throw new Error(error.message);
+            }
+      }
+
 
 
       // delete Task
