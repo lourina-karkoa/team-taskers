@@ -27,7 +27,24 @@ const validateAddProject = [
     }),
   validate,
 ];
-
+const validateProjectId = [
+  param('id')
+    .notEmpty().withMessage('Project ID is required')
+    .isMongoId().withMessage('Invalid project ID')
+    .custom(async (projectId) => {
+      const project = await Project.findById(projectId);
+      if (!project) {
+        return Promise.reject('Project not found');
+      }
+    }),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(404).json({ errors: errors.array() });
+    }
+    next();
+  }
+];
 
 
 // validation update project
@@ -101,3 +118,4 @@ module.exports = {
   validateAddProject,
   validateUpdateProject,
 };
+

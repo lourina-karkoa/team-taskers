@@ -1,25 +1,25 @@
 const express = require("express");
-//helmet
-const applyHelmet = require('./../src/middlewares/helmet.middleware');
-//rate-time
-const generalLimiter = require('./../src/middlewares/ratelimit.middleware');
+const applyHelmet = require('./config/helmet');//helmet
+const generalLimiter = require('./config/ratelimit');//rate-limit
 const routerAuth = require("./routes/auth.routes") //import auth
 const routerProject = require("./routes/projects.routes")//project
-const path = require("path");
-const tasksPath = require("./routes/tasks.routes");
-const ActivitiesLogRouters = require('./routes/ActivityLogs.routes');
-const ExportPdfRouters = require('./routes/exportPDF.routes');
-const NotesRouters = require('./routes/notes.routes');
-const errorHandler = require("./middlewares/errorhandler.middleware");
-const cleanInput = require('./middlewares/security.middleware');
-const logger = require("morgan");
+
+const path = require("path");//path
+const tasksPath = require("./routes/tasks.routes");//import task-router
+const ActivitiesLogRouters = require('./routes/ActivityLogs.routes');//import activity-router
+const ExportPdfRouters = require('./routes/exportPDF.routes');//import pdf-router
+const NotesRouters = require('./routes/notes.routes');//import notes-router
+const errorHandler = require("./middlewares/errorhandler.middleware");//error-handeler
+const cleanInput = require('./middlewares/security.middleware');//security
+const logger = require("morgan");//logar
+const cors = require("cors");//cors
 
 
 const app = express();
 
 //helmet
 app.use(applyHelmet);
-//rate-time
+//rate-limit
 app.use(generalLimiter);
 
 // middlewares
