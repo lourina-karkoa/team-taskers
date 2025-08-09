@@ -1,45 +1,29 @@
 const express = require('express');
 const router = express.Router();
 ///controller
-const ProjectController = require('../controllers/project.controller');
+const projectController = require('../controllers/project.controller');
 ////validation
-
 const { validateProject, validateProjectId } = require('./../validation/project.validate');
-
-const { 
-    validateAddProject,
-    validateUpdateProject
-}   = require('../validation/project.validate');
-
-
 ///middleware
-const auth = require("../middlewares/auth.middleware");
-const role = require("../middlewares/role.middleware");
-const validateObjectId = require('../middlewares/validateObjectId.middleware');
+const role = require('./../middlewares/role.middleware');
+const auth = require('./../middlewares/auth.middleware');
 
 ////get all project
-router.get( "/" ,[auth, role(["TeamMember","Manager"])],ProjectController.getAllProjects)
+router.get( "/" ,[auth, role(["TeamMember","Manager"])],projectController.getAllProjects)
 
 /////get project by id
-
 router.get("/:id", [auth, role(["TeamMember","Manager"]), validateProjectId], projectController.getOneProject);
-
 ////add new project
-
-router.post("/add",[auth,role(["Manager"]),...validateAddProject],ProjectController.addProject)
-
-
+router.post( "/add" ,[auth, role(["Manager"])], validateProject, projectController.addProject);
 
 //////update project by id
-
-router.put("/update/:id", [auth ,role (["Manager"]),validateObjectId("id"),...validateUpdateProject, validateProjectId],ProjectController.updateProject)
+router.put("/update/:id", [auth, role(["Manager"]), validateProjectId, validateProject], projectController.updateProject);
 
 ////////delete project by id
-router.delete("/delete/:id",[auth,role(["Manager"]),validateObjectId("id")], ProjectController.deleteProject);
-
+router.delete("/delete/:id", [auth, role(["Manager"]), validateProjectId], projectController.deleteProject);
 ////////delete all project 
-router.delete("/delete",[auth , role(["Manager"])], ProjectController.deleteAllProject);
 
+router.delete("/delete",[auth , role(["Manager"])], projectController.deleteAllProject);
 
 module.exports = router;
 

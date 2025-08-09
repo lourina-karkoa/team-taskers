@@ -1,32 +1,44 @@
-const { body, param } = require("express-validator");
-const validate = require("../middlewares/validate.middleware");
-const Project = require("../models/Project");
+const { body, param, validationResult } = require('express-validator');
+const Project = require('./../models/Project');
 
+const validateProject = [
+  body('name').notEmpty().withMessage('Name is required'),
+  body('description').optional().isString(),
 
-// vaildation add project
-const validateAddProject = [
+  body('startDate')
+    .optional()
+    .isISO8601().withMessage('Invalid startDate')
+    .toDate()
+    .custom((startDate, { req }) => {
+      if (req.body.endDate) {
+        const rawEnd = req.body.endDate;
+        const end = rawEnd instanceof Date ? rawEnd : new Date(rawEnd);
 
-  body("name").notEmpty().withMessage("Name is required"),
-  body("description")
-    .isString()
-    .withMessage("description must be a string (text)").bail(),
-  body("startDate")
-    .isISO8601()
-    .withMessage(
-      "Start date must be a valid ISO 8601 date (e.g., 2025-08-08)."
-    ),
-  body("endDate")
-    .isISO8601()
-    .withMessage("End date must be a valid ISO 8601 date (e.g., 2025-08-10).")
-  
-    .custom((value, { req }) => {
-      if (new Date(value) <= new Date(req.body.startDate)) {
-        throw new Error("Due date must be **after** the start date.");
+        if (isNaN(end.getTime())) {
+          return true;
+        }
+
+        if (startDate > end) {
+          throw new Error('Start date cannot be after end date');
+        }
       }
       return true;
     }),
-  validate,
+
+  body('endDate')
+    .optional()
+    .isISO8601().withMessage('Invalid endDate')
+    .toDate(),
+
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    next();
+  }
 ];
+
 const validateProjectId = [
   param('id')
     .notEmpty().withMessage('Project ID is required')
@@ -46,76 +58,4 @@ const validateProjectId = [
   }
 ];
 
-
-// validation update project
-const validateUpdateProject = [
-
-
-  param("id")
-
-    .custom(async (value) => {
-      const project = await Project.findById(value);
-      if (!project) {
-        throw new Error("project not found. Please check the project ID and try again.");
-      }
-      return true;
-    }).bail(),
-  body("name").isString().optional(),
-
-  body("description")
-    .isString()
-    .withMessage("description must be a string (text)")
-    .optional(),
-
-  body("startDate")
-    .isISO8601()
-    .withMessage("Start date must be a valid ISO 8601 date (e.g., 2025-08-08).")
-    .optional()
-    .custom(async (value, { req }) => {
-      if (!req.body.endDate) {
-        const exist = await Project.findById(req.params.id);
-
-        if (new Date(value) >= exist.endDate) {
-          throw new Error(
-            `start date must be **before** the date ${new Date(
-              exist.endDate
-            ).toISOString()}.`
-          );
-        }
-
-      }
-      return true;
-    })
-  ,
-
-  body("endDate")
-    .isISO8601()
-    .withMessage("End date must be a valid ISO 8601 date (e.g., 2025-08-10).")
-    .optional()
-    .bail()
-    .custom(async (value, { req }) => {
-      if (!req.body.startDate) {
-        const exist = await Project.findById(req.params.id);
-
-        if (new Date(value) < exist.startDate) {
-          throw new Error(
-            `end date must be **after** the date ${new Date(
-              exist.startDate
-            ).toISOString()}.`
-          );
-        }
-        return true;
-      }
-      if (new Date(value) <= new Date(req.body.startDate)) {
-        throw new Error("Due date must be **after** the start date.");
-      }
-      return true;
-    }),
-  validate,
-];
-
-module.exports = {
-  validateAddProject,
-  validateUpdateProject,
-};
-
+module.exports = { validateProject, validateProjectId };
