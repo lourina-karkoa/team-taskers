@@ -10,13 +10,16 @@ const projectSchema = new mongoose.Schema({
     required: true
   },
   description: {
-    type: String
+    type: String,
+    required: true
   },
   startDate: {
-    type: Date
+    type: Date,
+    required: true
   },
   endDate: {
-    type: Date
+    type: Date,
+    required: true
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,

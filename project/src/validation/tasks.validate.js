@@ -145,20 +145,25 @@ const updateTaskValidate = [
     .withMessage("description must be string"),
 
   body("startDate")
-    .if((value, { req }) => req.user.role === "Manager")
-    .optional()
-    .isISO8601()
-    .withMessage("Start date must be a valid ISO 8601 date (e.g., 2025-08-08).")
-    ,
+    .isISO8601().withMessage("Start date must be a valid ISO 8601 date (e.g., 2025-08-08).")
+    .custom(async(value,{req})=>{
+        const exist = await Project.findById(req.body.projectId);
+        if(exist.startDate > new Date(value) || exist.endDate < new Date(value)){
+            throw new Error("startDate must be between the start and end time of the project.");
+        }
+        return true
+    }),
 
   body("dueDate")
-    .if((value, { req }) => req.user.role === "Manager")
-    .optional()
-    .isISO8601()
-    .withMessage("Due date must be a valid ISO 8601 date (e.g., 2025-08-10).")
-    .custom((value, { req }) => {
-      if (req.body.startDate && new Date(value) <= new Date(req.body.startDate)) {
-        throw new Error("Due date must be after start date");
+    .isISO8601().withMessage("Due date must be a valid ISO 8601 date (e.g., 2025-08-10).")
+    .bail()
+    .custom(async(value, { req }) => {
+       const exist = await Project.findById(req.body.projectId);
+        if(exist.startDate > new Date(value) || exist.endDate < new Date(value)){
+            throw new Error("dueDate must be between the start and end time of the project.");
+        }
+      if (new Date(value) <= new Date(req.body.startDate)) {
+        throw new Error("Due date must be after the start date.");
       }
       return true;
     }),
@@ -197,4 +202,5 @@ module.exports = {
   getTaskByIdValidate,
   updateTaskValidate,
   deleteTaskValidate,
+  createTaskValidate
 };
