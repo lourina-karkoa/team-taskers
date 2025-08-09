@@ -10,15 +10,20 @@ const { getTaskByIdValidate,createTaskValidate, updateTaskValidate , deleteTaskV
 // Get
 router.get("/", [auth, role(["Manager"])],TasksController.getAllTaskes );
 
+router.get("/filterTasks",[auth, role(["Manager"])],TasksController.filterTasks);
+
 router.get("/:id", [auth, role(["TeamMember","Manager"]), ...getTaskByIdValidate], TasksController.getTaskById);
 
 
+
+
+
 // Post
-router.post("/add", [auth, role(["Manager"]),...createTaskValidate],TasksController.createTask );
+// router.post("/add", [auth, role(["Manager"]),...createTaskValidate],TasksController.createTask );
 
 
-// Put
-router.put("/update/:id", [auth, role(["Manager", "TeamMember"]), ...updateTaskValidate], TasksController.updateTask);
+// // Put
+// router.put("/update-Status/:id", [auth, role(["Manager", "TeamMember"]), ...updateTaskValidate], TasksController.updateStatus);
 
 
 // Delete

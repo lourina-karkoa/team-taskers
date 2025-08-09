@@ -3,6 +3,7 @@ const applyHelmet = require('./config/helmet');//helmet
 const generalLimiter = require('./config/ratelimit');//rate-limit
 const routerAuth = require("./routes/auth.routes") //import auth
 const routerProject = require("./routes/projects.routes")//project
+
 const path = require("path");//path
 const tasksPath = require("./routes/tasks.routes");//import task-router
 const ActivitiesLogRouters = require('./routes/ActivityLogs.routes');//import activity-router
@@ -13,6 +14,7 @@ const cleanInput = require('./middlewares/security.middleware');//security
 const logger = require("morgan");//logar
 const cors = require("cors");//cors
 
+
 const app = express();
 
 //helmet
@@ -22,10 +24,7 @@ app.use(generalLimiter);
 
 // middlewares
 app.use(logger("dev"));
-app.use(cors({
-    origin: "*",
-    methods: ["GET", "POST"]
-}));
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, '../public/uploads')));
 app.use(express.urlencoded({ extended: true }));

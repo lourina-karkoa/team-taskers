@@ -5,6 +5,8 @@ const paginate = require("../plugins/paginate");
 const projectSchema = new mongoose.Schema({
   name: {
     type: String,
+    trim:true,
+    unique:true,
     required: true
   },
   description: {

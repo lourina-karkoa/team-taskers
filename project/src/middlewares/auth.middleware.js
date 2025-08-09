@@ -27,7 +27,9 @@ const auth = async (req, res, next) => {
             email
         };
 
-        console.log(req.user)
+
+    
+     
 
         next();
     } catch (error) {

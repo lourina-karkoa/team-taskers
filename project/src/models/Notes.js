@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-
-const Notes = mongoose.model("Notes", new mongoose.Schema({
+const paginate = require('../plugins/paginate');
+const NoteSchema =  new mongoose.Schema({
     author: { 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Users', 
@@ -15,9 +15,10 @@ const Notes = mongoose.model("Notes", new mongoose.Schema({
         type: String,
         required: true 
     },
-    important : { type: Boolean, default: false }
+    important : { type: mongoose.Schema.Types.Boolean,default:false }
 }, {
     timestamps: true
-}))
-
+})
+NoteSchema.plugin(paginate);
+const Notes = mongoose.model("Notes",NoteSchema)
 module.exports = Notes;

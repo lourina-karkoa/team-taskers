@@ -4,15 +4,15 @@ const sendNotification = require("../helpers/Notification");
 const Notes = require("../models/Notes");
 const Project = require("../models/Project");
 const ActivityLogs = require("../models/ActivityLogs");
+const logActivity = require('../helpers/logActivity.helper');
+
+
 
 class TasksController {
-          // get All Taskes
+      // get All Taskes
       async getAllTaskes(req, res) {
             try {
-                  // const {status , dueDate ,projectId ,assignedTo } = req.query;
-
-                  //if (status && dueDate && projectId && assignedTo){
-                  //tasks = await Task.find({ شي للفلترة  }).populate("projectId").populate("assignedTo") ; }
+      
 
                   const tasks = await Task.find()
                         .populate({
@@ -26,7 +26,7 @@ class TasksController {
                   throw new Error(error.message);
             }
       };
-      
+
       // get Taske by id
       async getTaskById(req, res) {
             try {
@@ -44,7 +44,7 @@ class TasksController {
 
       };
 
-      // Add Task
+
       async createTask(req, res) {
             try {
 
@@ -60,7 +60,8 @@ class TasksController {
                         projectId,
                         assignedTo
                   });
-
+                  // Log activity
+                  await logActivity('CREATE_TASK',req.user.id,'Task',task._id);
                   // send Notifcation
                   const io = req.app.get("io");
                   const userSockets = req.app.get("userSockets");
@@ -80,6 +81,7 @@ class TasksController {
 
       };
 
+
       // edit status || edit Task data
       async updateTask(req, res) {
             try {
@@ -87,6 +89,17 @@ class TasksController {
                   let updates = req.body;
 
                   if (req.user.role === "TeamMember") {
+                        
+                        const task = await Task.findById(taskId);
+
+                        if (!task.assignedTo.equals(req.user._id)) {
+                              return res.status(403).json({
+                                    state: "error",
+                                    message: "You can only update tasks assigned to you",
+                                    data: null
+                              });
+                        }
+
                         if (!updates.status || Object.keys(updates).length > 1) {
                               return res.status(403).json({
                                     state: "error",
@@ -94,6 +107,7 @@ class TasksController {
                                     data: null
                               });
                         }
+
                         updates = { status: updates.status };
                   }
 
@@ -106,7 +120,6 @@ class TasksController {
                   // sendNotification to manger
                   const editingUserName = req.user.name;
                   const project = await Project.findById(updatedTask.projectId).populate("createdBy");
-                  console.log("Manager ID:", project?.createdBy?._id);
                   const managerId = project?.createdBy._id.toString();
 
                   if (managerId) {
@@ -130,6 +143,8 @@ class TasksController {
                   throw new Error(error.message);
             }
       }
+
+
 
       // delete Task
       async deleteTask(req, res) {
@@ -205,6 +220,44 @@ class TasksController {
                   throw new Error(error.message);
             }
       }
+
+      //Bringing tasks according to the status,projcet,the delivery Time , member(only manager)
+      async filterTasks (req,res){
+          try{
+            const {status,project,assignedTo,deliveryDate} = req.query;
+            const page = parseInt(req.query.page) ||1;
+            
+
+            
+            let filter = Object.fromEntries(
+                  Object.entries({
+                        projectId:project,
+                        status:status,
+                        assignedTo,
+                       
+            }).filter(([_,value])=>Boolean(value))
+      );
+            if(deliveryDate){
+                  filter.dueDate = {...({$lte:new Date(deliveryDate)})}
+            }
+
+            const tasks = await Task.paginate({filter:filter,populatePath:'projectId assignedTo',populateSel:'name email role name',page:page})
+
+            
+            return res.status(200).json({
+                  status:"success",
+                  message:" tasks have been brought successfully",
+                  tasks:tasks
+            })
+      }catch(error){
+      
+          throw new Error(error.message);
+      }
+
+}
+
+
+
 
 
 }
